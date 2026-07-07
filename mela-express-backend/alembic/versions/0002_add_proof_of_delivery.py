@@ -13,12 +13,20 @@ down_revision = "0001"
 branch_labels = None
 depends_on = None
 
-
 def upgrade() -> None:
-    # TODO: implement proof_of_delivery table creation (Task 2.3)
-    pass
-
+    op.create_table(
+        'parcel_proof_of_delivery',
+        sa.Column('id', sa.UUID(), nullable=False),
+        sa.Column('parcel_id', sa.UUID(), nullable=False),
+        sa.Column('photo_url', sa.String(length=500), nullable=False),
+        sa.Column('signature_url', sa.String(length=500), nullable=True),
+        sa.Column('notes', sa.Text(), nullable=True),
+        sa.Column('created_by', sa.UUID(), nullable=False),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+        sa.ForeignKeyConstraint(['created_by'], ['staff_users.id'], ),
+        sa.ForeignKeyConstraint(['parcel_id'], ['parcels.id'], ),
+        sa.PrimaryKeyConstraint('id')
+    )
 
 def downgrade() -> None:
-    # TODO: implement rollback (Task 2.3)
-    pass
+    op.drop_table('parcel_proof_of_delivery')
