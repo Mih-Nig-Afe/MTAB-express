@@ -1,0 +1,67 @@
+version: "3.9"
+
+# Dev overrides: hot reload, no Nginx
+services:
+  api:
+    build:
+      context: ./mela-express-backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./mela-express-backend:/app
+    ports:
+      - "8000:8000"
+    env_file: .env
+    depends_on:
+      - db
+      - redis
+
+  bot:
+    build:
+      context: ./mela-express-backend
+    command: python -m app.bot.bot
+    volumes:
+      - ./mela-express-backend:/app
+    env_file: .env
+    depends_on:
+      - api
+
+  worker:
+    build:
+      context: ./mela-express-backend
+    command: celery -A app.workers.celery_app worker --loglevel=info
+    volumes:
+      - ./mela-express-backend:/app
+    env_file: .env
+    depends_on:
+      - db
+      - redis
+
+  beat:
+    build:
+      context: ./mela-express-backend
+    command: celery -A app.workers.celery_app beat --loglevel=info
+    volumes:
+      - ./mela-express-backend:/app
+    env_file: .env
+    depends_on:
+      - redis
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: mela_express
+      POSTGRES_USER: mela
+      POSTGRES_PASSWORD: mela
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:
