@@ -1,1 +1,1 @@
-# app/workers — Celery task modules
+"""Workers package."""
