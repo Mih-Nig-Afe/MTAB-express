@@ -122,6 +122,8 @@ class Parcel(Base):
 
     status: Mapped[ParcelStatus] = mapped_column(Enum(ParcelStatus, name="parcel_status_enum", native_enum=True, create_type=False, values_callable=lambda x: [e.value for e in x]), default=ParcelStatus.CREATED)
     waybill_url: Mapped[str] = mapped_column(String(500), nullable=True)
+    pickup_otp: Mapped[str] = mapped_column(String(10), nullable=True)
+    otp_expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
 
     created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("staff_users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
@@ -195,6 +197,22 @@ class ManifestParcel(Base):
 
     manifest: Mapped["TransferManifest"] = relationship()
     parcel: Mapped["Parcel"] = relationship()
+
+
+class ManifestCheckpoint(Base):
+    __tablename__ = "manifest_checkpoints"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=gen_uuid)
+    manifest_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("transfer_manifests.id"))
+    location_name: Mapped[str] = mapped_column(String(120))
+    latitude: Mapped[float] = mapped_column(Numeric(9, 6), nullable=True)
+    longitude: Mapped[float] = mapped_column(Numeric(9, 6), nullable=True)
+    note: Mapped[str] = mapped_column(Text, nullable=True)
+    created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("staff_users.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    manifest: Mapped["TransferManifest"] = relationship()
+
 
 
 class ParcelProofOfDelivery(Base):
