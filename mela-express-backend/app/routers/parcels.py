@@ -280,3 +280,82 @@ async def upload_proof(
     
     await db.commit()
     return {"message": "Proof of delivery uploaded successfully"}
+
+
+@router.post("/{parcel_id}/otp", response_model=OTPGenerateOut)
+async def generate_pickup_otp(
+    parcel_id: uuid.UUID,
+    current_user: CurrentUser = Depends(require_roles(StaffRole.OPERATOR, StaffRole.MANAGER, StaffRole.ADMIN)),
+    db: AsyncSession = Depends(get_db)
+):
+    import random
+    from datetime import datetime, timedelta, timezone
+
+    parcel = await db.get(Parcel, parcel_id)
+    if not parcel:
+        raise NotFoundError("Parcel not found")
+        
+    otp = f"{random.randint(100000, 999999)}"
+    parcel.pickup_otp = otp
+    parcel.otp_expires_at = datetime.now(timezone.utc) + timedelta(hours=72)
+    
+    await db.commit()
+    
+    return OTPGenerateOut(
+        parcel_id=parcel.id,
+        tracking_code=parcel.tracking_code,
+        pickup_otp=otp,
+        receiver_phone=parcel.receiver_phone,
+        message=f"OTP generated and sent to {parcel.receiver_phone}"
+    )
+
+
+@router.post("/{parcel_id}/verify-pickup", response_model=ParcelDetailOut)
+async def verify_pickup_otp(
+    parcel_id: uuid.UUID,
+    payload: VerifyPickupRequest,
+    current_user: CurrentUser = Depends(require_roles(StaffRole.OPERATOR, StaffRole.MANAGER, StaffRole.ADMIN)),
+    db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(
+        select(Parcel).options(
+            selectinload(Parcel.status_history)
+        ).where(Parcel.id == parcel_id)
+    )
+    parcel = result.scalar_one_or_none()
+    if not parcel:
+        raise NotFoundError("Parcel not found")
+        
+    if parcel.payment_mode == PaymentMode.AFTER and parcel.payment_status != PaymentStatus.PAID:
+        raise PaymentRequired("Cash payment of delivery fee must be collected before handover.")
+        
+    if parcel.pickup_otp and parcel.pickup_otp != payload.otp.strip():
+        raise HTTPException(status_code=400, detail="Invalid OTP code entered. Please verify with the receiver.")
+        
+    proof = ParcelProofOfDelivery(
+        parcel_id=parcel.id,
+        photo_url=payload.photo_url or "https://mela-express.com/proof/default.jpg",
+        signature_url=payload.signature_url,
+        notes=payload.notes or "Verified via SMS/Telegram OTP at destination branch",
+        created_by=current_user.id
+    )
+    db.add(proof)
+    
+    from_status = parcel.status
+    parcel.status = ParcelStatus.DELIVERED
+    parcel.pickup_otp = None
+    
+    history = ParcelStatusHistory(
+        parcel_id=parcel.id,
+        from_status=from_status,
+        to_status=ParcelStatus.DELIVERED,
+        changed_by=current_user.id,
+        branch_id=current_user.branch_id or parcel.destination_branch_id,
+        note=f"Handover verified via OTP. Signature: {'Captured' if payload.signature_url else 'None'}"
+    )
+    db.add(history)
+    
+    await db.commit()
+    await db.refresh(parcel)
+    return parcel
+

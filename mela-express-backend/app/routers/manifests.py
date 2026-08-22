@@ -127,6 +127,10 @@ async def get_manifest(
         if p:
             parcels.append(ParcelOut.model_validate(p))
             
+    cps_q = select(ManifestCheckpoint).where(ManifestCheckpoint.manifest_id == manifest.id).order_by(ManifestCheckpoint.created_at.desc())
+    cps_res = await db.execute(cps_q)
+    checkpoints = cps_res.scalars().all()
+            
     return ManifestDetailOut(
         id=manifest.id,
         origin_branch_id=manifest.origin_branch_id,
@@ -137,8 +141,35 @@ async def get_manifest(
         notes=manifest.notes,
         created_at=manifest.created_at,
         parcel_count=len(parcels),
-        parcels=parcels
+        parcels=parcels,
+        checkpoints=[ManifestCheckpointOut.model_validate(cp) for cp in checkpoints]
     )
+
+
+@router.post("/{manifest_id}/checkpoints", response_model=ManifestCheckpointOut)
+async def add_manifest_checkpoint(
+    manifest_id: uuid.UUID,
+    checkpoint_in: ManifestCheckpointCreate,
+    current_user: CurrentUser = Depends(require_roles(StaffRole.DRIVER, StaffRole.OPERATOR, StaffRole.MANAGER, StaffRole.ADMIN)),
+    db: AsyncSession = Depends(get_db)
+):
+    manifest = await db.get(TransferManifest, manifest_id)
+    if not manifest:
+        raise NotFoundError("Manifest not found")
+        
+    cp = ManifestCheckpoint(
+        manifest_id=manifest.id,
+        location_name=checkpoint_in.location_name,
+        latitude=checkpoint_in.latitude,
+        longitude=checkpoint_in.longitude,
+        note=checkpoint_in.note,
+        created_by=current_user.id
+    )
+    db.add(cp)
+    await db.commit()
+    await db.refresh(cp)
+    return cp
+
 
 
 @router.post("/{manifest_id}/receive", response_model=ManifestOut)

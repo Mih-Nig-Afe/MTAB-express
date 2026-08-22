@@ -1,12 +1,34 @@
 import httpx
-from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
+from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 from telegram.ext import ContextTypes
 from app.bot.messages import WELCOME, LINKED, ERROR_GENERIC
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [[KeyboardButton("📱 Share Phone Number", request_contact=True)]]
-    reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
+    reply_keyboard = [
+        [KeyboardButton("📱 Link Phone Number", request_contact=True)],
+    ]
+    reply_markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True, resize_keyboard=True)
+
+    inline_keyboard = [
+        [
+            InlineKeyboardButton(
+                "🚀 Open Mela Mini App",
+                web_app=WebAppInfo(url="http://localhost:3001/mini-app")
+            )
+        ],
+        [
+            InlineKeyboardButton("🔍 Track Parcel", callback_data="cmd_track"),
+            InlineKeyboardButton("📦 My Orders", callback_data="cmd_my_parcels"),
+        ],
+        [
+            InlineKeyboardButton("🏢 Branch Hubs", callback_data="cmd_branches"),
+            InlineKeyboardButton("📞 Customer Support", url="https://t.me/mela_support"),
+        ]
+    ]
+    inline_markup = InlineKeyboardMarkup(inline_keyboard)
+
     await update.message.reply_text(WELCOME, reply_markup=reply_markup)
+    await update.message.reply_text("✨ Or launch our interactive web app directly inside Telegram:", reply_markup=inline_markup)
 
 async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     contact = update.message.contact
@@ -14,7 +36,6 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     phone = contact.phone_number
-    # Basic normalization if needed (e.g., removing +)
     if phone.startswith("+"):
         phone = phone[1:]
 
@@ -23,12 +44,24 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                "http://localhost:8000/api/customers/link",
+                "http://localhost:8000/api/v1/customers/link",
                 json={"phone": phone, "telegram_id": str(update.effective_user.id)}
             )
             response.raise_for_status()
         
-        await update.message.reply_text(LINKED, reply_markup=ReplyKeyboardRemove())
+        inline_keyboard = [
+            [
+                InlineKeyboardButton(
+                    "📦 View My Parcels & Active Shipments",
+                    web_app=WebAppInfo(url="http://localhost:3001/mini-app")
+                )
+            ]
+        ]
+        await update.message.reply_text(
+            f"✅ *Account Successfully Linked!* \nPhone: `{phone}`\n\nYou will now receive automatic real-time push notifications whenever your shipments move across hubs.",
+            parse_mode="Markdown",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard)
+        )
     except Exception as e:
         print(f"Error linking account: {e}")
-        await update.message.reply_text(ERROR_GENERIC, reply_markup=ReplyKeyboardRemove())
+        await update.message.reply_text(ERROR_GENERIC)
