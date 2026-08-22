@@ -53,14 +53,23 @@ class StaffRole(str, enum.Enum):
     ADMIN = "admin"
 
 
+class ManifestStatus(str, enum.Enum):
+    DRAFT = "draft"
+    IN_TRANSIT = "in_transit"
+    RECEIVED = "received"
+    CANCELLED = "cancelled"
+
+
 class Branch(Base):
     __tablename__ = "branches"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=gen_uuid)
     name: Mapped[str] = mapped_column(String(120))
+    code: Mapped[str] = mapped_column(String(5), unique=True)
     city: Mapped[str] = mapped_column(String(80))
     address: Mapped[str] = mapped_column(String(255), nullable=True)
     phone: Mapped[str] = mapped_column(String(30), nullable=True)
+    email: Mapped[str] = mapped_column(String(120), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
 
@@ -70,7 +79,9 @@ class StaffUser(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=gen_uuid)
     name: Mapped[str] = mapped_column(String(120))
     phone: Mapped[str] = mapped_column(String(30), unique=True)
-    role: Mapped[StaffRole] = mapped_column(Enum(StaffRole))
+    email: Mapped[str] = mapped_column(String(120), unique=True, nullable=True)
+    password_hash: Mapped[str] = mapped_column(String(255))
+    role: Mapped[StaffRole] = mapped_column(Enum(StaffRole, name="staff_role_enum", native_enum=True, create_type=False, values_callable=lambda x: [e.value for e in x]))
     branch_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("branches.id"), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
@@ -105,11 +116,12 @@ class Parcel(Base):
     declared_value: Mapped[float] = mapped_column(Numeric(10, 2), nullable=True)
 
     price: Mapped[float] = mapped_column(Numeric(10, 2))
-    payment_mode: Mapped[PaymentMode] = mapped_column(Enum(PaymentMode))
-    payment_method: Mapped[PaymentMethod] = mapped_column(Enum(PaymentMethod), nullable=True)
-    payment_status: Mapped[PaymentStatus] = mapped_column(Enum(PaymentStatus), default=PaymentStatus.PENDING)
+    payment_mode: Mapped[PaymentMode] = mapped_column(Enum(PaymentMode, name="payment_mode_enum", native_enum=True, create_type=False, values_callable=lambda x: [e.value for e in x]))
+    payment_method: Mapped[PaymentMethod] = mapped_column(Enum(PaymentMethod, name="payment_method_enum", native_enum=True, create_type=False, values_callable=lambda x: [e.value for e in x]), nullable=True)
+    payment_status: Mapped[PaymentStatus] = mapped_column(Enum(PaymentStatus, name="payment_status_enum", native_enum=True, create_type=False, values_callable=lambda x: [e.value for e in x]), default=PaymentStatus.PENDING)
 
-    status: Mapped[ParcelStatus] = mapped_column(Enum(ParcelStatus), default=ParcelStatus.CREATED)
+    status: Mapped[ParcelStatus] = mapped_column(Enum(ParcelStatus, name="parcel_status_enum", native_enum=True, create_type=False, values_callable=lambda x: [e.value for e in x]), default=ParcelStatus.CREATED)
+    waybill_url: Mapped[str] = mapped_column(String(500), nullable=True)
 
     created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("staff_users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
@@ -126,8 +138,8 @@ class ParcelStatusHistory(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=gen_uuid)
     parcel_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("parcels.id"))
-    from_status: Mapped[ParcelStatus] = mapped_column(Enum(ParcelStatus), nullable=True)
-    to_status: Mapped[ParcelStatus] = mapped_column(Enum(ParcelStatus))
+    from_status: Mapped[ParcelStatus] = mapped_column(Enum(ParcelStatus, name="parcel_status_enum", native_enum=True, create_type=False, values_callable=lambda x: [e.value for e in x]), nullable=True)
+    to_status: Mapped[ParcelStatus] = mapped_column(Enum(ParcelStatus, name="parcel_status_enum", native_enum=True, create_type=False, values_callable=lambda x: [e.value for e in x]))
     changed_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("staff_users.id"), nullable=True)
     branch_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("branches.id"), nullable=True)
     note: Mapped[str] = mapped_column(Text, nullable=True)
@@ -142,11 +154,72 @@ class Payment(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=gen_uuid)
     parcel_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("parcels.id"))
     amount: Mapped[float] = mapped_column(Numeric(10, 2))
-    method: Mapped[PaymentMethod] = mapped_column(Enum(PaymentMethod))
+    method: Mapped[PaymentMethod] = mapped_column(Enum(PaymentMethod, name="payment_method_enum", native_enum=True, create_type=False, values_callable=lambda x: [e.value for e in x]))
     chapa_tx_ref: Mapped[str] = mapped_column(String(100), unique=True, nullable=True, index=True)
-    status: Mapped[PaymentStatus] = mapped_column(Enum(PaymentStatus), default=PaymentStatus.PENDING)
+    status: Mapped[PaymentStatus] = mapped_column(Enum(PaymentStatus, name="payment_status_enum", native_enum=True, create_type=False, values_callable=lambda x: [e.value for e in x]), default=PaymentStatus.PENDING)
     collected_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("staff_users.id"), nullable=True)
     verified_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    override_reason: Mapped[str] = mapped_column(Text, nullable=True)
 
     parcel: Mapped["Parcel"] = relationship(back_populates="payments")
+
+
+class TransferManifest(Base):
+    __tablename__ = "transfer_manifests"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=gen_uuid)
+    origin_branch_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("branches.id"))
+    destination_branch_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("branches.id"))
+    created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("staff_users.id"))
+    driver_name: Mapped[str] = mapped_column(String(120), nullable=True)
+    vehicle_plate: Mapped[str] = mapped_column(String(20), nullable=True)
+    status: Mapped[ManifestStatus] = mapped_column(Enum(ManifestStatus, name="manifest_status_enum", native_enum=True, create_type=False, values_callable=lambda x: [e.value for e in x]), default=ManifestStatus.DRAFT)
+    notes: Mapped[str] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    origin_branch: Mapped["Branch"] = relationship(foreign_keys=[origin_branch_id])
+    destination_branch: Mapped["Branch"] = relationship(foreign_keys=[destination_branch_id])
+
+
+class ManifestParcel(Base):
+    __tablename__ = "manifest_parcels"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=gen_uuid)
+    manifest_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("transfer_manifests.id"))
+    parcel_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("parcels.id"))
+    received: Mapped[bool] = mapped_column(Boolean, default=False)
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    received_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("staff_users.id"), nullable=True)
+
+    manifest: Mapped["TransferManifest"] = relationship()
+    parcel: Mapped["Parcel"] = relationship()
+
+
+class ParcelProofOfDelivery(Base):
+    __tablename__ = "parcel_proof_of_delivery"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=gen_uuid)
+    parcel_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("parcels.id"))
+    photo_url: Mapped[str] = mapped_column(String(500))
+    signature_url: Mapped[str] = mapped_column(String(500), nullable=True)
+    notes: Mapped[str] = mapped_column(Text, nullable=True)
+    created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("staff_users.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    parcel: Mapped["Parcel"] = relationship()
+
+
+class NotificationLog(Base):
+    __tablename__ = "notification_logs"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=gen_uuid)
+    parcel_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("parcels.id"), nullable=True)
+    customer_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("customers.id"), nullable=True)
+    channel: Mapped[str] = mapped_column(String(20))
+    message: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(20))
+    error_detail: Mapped[str] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+

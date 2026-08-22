@@ -1,4 +1,61 @@
-// TODO: implement Sidebar navigation component (Task 22.4)
-export function Sidebar() {
-  return <nav>Sidebar — TODO</nav>;
+'use client';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useAuth } from '@/lib/auth';
+import { cn } from '@/lib/utils';
+import { useState } from 'react';
+
+export default function Sidebar() {
+  const pathname = usePathname();
+  const { user } = useAuth();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const links = [
+    { href: '/dashboard', label: 'Dashboard', icon: '📊' },
+    { href: '/parcels', label: 'Parcels', icon: '📦' },
+    { href: '/manifests', label: 'Manifests', icon: '📋' },
+    { href: '/cash', label: 'Cash', icon: '💰' },
+    { href: '/reports', label: 'Reports', icon: '📈' },
+  ];
+
+  const adminLinks = [
+    { href: '/admin/branches', label: 'Branches', icon: '🏢' },
+    { href: '/admin/staff', label: 'Staff', icon: '👥' },
+    { href: '/admin/overrides', label: 'Overrides', icon: '⚙️' },
+  ];
+
+  const isAdmin = user?.role === 'admin' || user?.role === 'manager';
+
+  return (
+    <>
+      <button className="md:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-md shadow" onClick={() => setIsOpen(!isOpen)}>
+        ☰
+      </button>
+      <div className={cn("fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 ease-in-out md:translate-x-0", isOpen ? "translate-x-0" : "-translate-x-full")}>
+        <div className="flex items-center justify-center h-16 border-b border-gray-200">
+          <span className="text-xl font-bold text-blue-600">Mela Express</span>
+        </div>
+        <nav className="p-4 space-y-1 overflow-y-auto h-[calc(100vh-4rem)]">
+          {links.map((link) => (
+            <Link key={link.href} href={link.href} className={cn("flex items-center px-4 py-2 text-sm font-medium rounded-md", pathname.startsWith(link.href) ? "bg-blue-50 text-blue-700" : "text-gray-700 hover:bg-gray-50")}>
+              <span className="mr-3">{link.icon}</span> {link.label}
+            </Link>
+          ))}
+          
+          {isAdmin && (
+            <>
+              <div className="pt-4 pb-2">
+                <p className="px-4 text-xs font-semibold tracking-wider text-gray-500 uppercase">Admin</p>
+              </div>
+              {adminLinks.map((link) => (
+                <Link key={link.href} href={link.href} className={cn("flex items-center px-4 py-2 text-sm font-medium rounded-md", pathname.startsWith(link.href) ? "bg-blue-50 text-blue-700" : "text-gray-700 hover:bg-gray-50")}>
+                  <span className="mr-3">{link.icon}</span> {link.label}
+                </Link>
+              ))}
+            </>
+          )}
+        </nav>
+      </div>
+    </>
+  );
 }

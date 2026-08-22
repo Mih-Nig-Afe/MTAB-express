@@ -1,8 +1,22 @@
-// TODO: implement root layout with Sidebar and TopBar (Task 22.4)
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+import type { Metadata } from "next";
+import "./globals.css";
+import ClientLayout from "./client-layout";
+
+export const metadata: Metadata = {
+  title: "Mela Express Dashboard",
+  description: "Mela Express Dashboard",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body className="antialiased bg-gray-50 text-gray-900" suppressHydrationWarning>
+        <ClientLayout>{children}</ClientLayout>
+      </body>
     </html>
   );
 }
