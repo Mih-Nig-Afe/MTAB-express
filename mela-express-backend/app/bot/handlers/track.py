@@ -1,5 +1,5 @@
 import httpx
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.ext import ContextTypes
 from app.bot.messages import TRACK_USAGE, PARCEL_NOT_FOUND, STATUS_FORMAT, ERROR_GENERIC
 
@@ -12,7 +12,7 @@ async def track(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(f"http://localhost:8000/api/parcels/track/{code}")
+            response = await client.get(f"http://localhost:8000/api/v1/parcels/track/{code}")
             
             if response.status_code == 404:
                 await update.message.reply_text(PARCEL_NOT_FOUND.format(code=code))
@@ -25,15 +25,22 @@ async def track(update: Update, context: ContextTypes.DEFAULT_TYPE):
             code=data["tracking_code"],
             origin=data["origin_branch_name"],
             destination=data["destination_branch_name"],
-            status=data["status"],
-            payment_status=data["payment_status"]
+            status=data["status"].replace("_", " ").upper(),
+            payment_status=data["payment_status"].upper()
         )
 
-        reply_markup = None
+        buttons = [
+            [
+                InlineKeyboardButton(
+                    "📍 Live Timeline & Map",
+                    web_app=WebAppInfo(url=f"http://localhost:3001/track/{code}")
+                )
+            ]
+        ]
         if data["payment_status"] == "pending":
-            keyboard = [[InlineKeyboardButton("💳 Pay Now", callback_data=f"pay_{data['tracking_code']}")]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
+            buttons.append([InlineKeyboardButton("💳 Pay Online (Telebirr / Chapa)", callback_data=f"pay_{data['tracking_code']}")])
 
+        reply_markup = InlineKeyboardMarkup(buttons)
         await update.message.reply_text(status_text, parse_mode="Markdown", reply_markup=reply_markup)
 
     except Exception as e:

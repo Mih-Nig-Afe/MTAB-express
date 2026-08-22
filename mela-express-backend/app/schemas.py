@@ -168,9 +168,27 @@ class ParcelOut(BaseModel):
 
 class ParcelDetailOut(ParcelOut):
     status_history: list[StatusHistoryOut] = Field(default_factory=list)
+    pickup_otp: str | None = None
+
+class ManifestCheckpointCreate(BaseModel):
+    location_name: str
+    latitude: float | None = None
+    longitude: float | None = None
+    note: str | None = None
+
+class ManifestCheckpointOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: uuid.UUID
+    manifest_id: uuid.UUID
+    location_name: str
+    latitude: float | None = None
+    longitude: float | None = None
+    note: str | None = None
+    created_at: datetime
 
 class ManifestDetailOut(ManifestOut):
     parcels: list[ParcelOut] = Field(default_factory=list)
+    checkpoints: list[ManifestCheckpointOut] = Field(default_factory=list)
 
 class ParcelTrackOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -180,6 +198,7 @@ class ParcelTrackOut(BaseModel):
     origin_branch_name: str
     destination_branch_name: str
     status_history: list[StatusHistoryOut] = Field(default_factory=list)
+    checkpoints: list[ManifestCheckpointOut] = Field(default_factory=list)
     created_at: datetime
 
 class ChapaInitRequest(BaseModel):
@@ -190,4 +209,18 @@ class ChapaWebhookPayload(BaseModel):
     tx_ref: str
     status: str
     amount: str | None = None
+
+class OTPGenerateOut(BaseModel):
+    parcel_id: uuid.UUID
+    tracking_code: str
+    pickup_otp: str
+    receiver_phone: str
+    message: str
+
+class VerifyPickupRequest(BaseModel):
+    otp: str
+    signature_url: str | None = None
+    photo_url: str | None = None
+    notes: str | None = None
+
 
