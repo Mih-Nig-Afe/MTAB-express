@@ -1,12 +1,66 @@
 name: Deploy to VPS
 
+# Deploys main → production VPS via SSH + docker compose.
+#
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   DEPLOY_SSH_HOST     – VPS hostname or IP
+#   DEPLOY_SSH_USER     – SSH user (with Docker group membership)
+#   DEPLOY_SSH_KEY      – private SSH key allowed to log in to the VPS
+#   DEPLOY_PATH         – absolute path of the app checkout on the VPS (e.g. /opt/mela)
+#
+# The job is skipped (not failed) when secrets are not configured yet,
+# so the workflow stays green on forks / before first provisioning.
+
 on:
   push:
-    branches: [main]
+    branches: [production]
 
 jobs:
   deploy:
+    name: SSH deploy & docker compose up
     runs-on: ubuntu-latest
+    environment: production
+
     steps:
-      - uses: actions/checkout@v4
-      # TODO: add SSH deploy steps
+      - name: Check deploy secrets configured
+        id: guard
+        run: |
+          if [ -z "${{ secrets.DEPLOY_SSH_HOST }}" ] || \
+             [ -z "${{ secrets.DEPLOY_SSH_USER }}" ] || \
+             [ -z "${{ secrets.DEPLOY_SSH_KEY }}" ] || \
+             [ -z "${{ secrets.DEPLOY_PATH }}" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Deploy skipped — DEPLOY_SSH_HOST/USER/KEY/PATH secrets not set."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy over SSH
+        if: steps.guard.outputs.configured == 'true'
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.DEPLOY_SSH_HOST }}
+          username: ${{ secrets.DEPLOY_SSH_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -e
+            cd ${{ secrets.DEPLOY_PATH }}
+            git fetch --all
+            git reset --hard origin/production
+            docker compose pull db redis nginx certbot || true
+            docker compose build api bot worker beat dashboard
+            docker compose up -d --remove-orphans
+            docker image prune -f
+
+      - name: Post-deploy health check
+        if: steps.guard.outputs.configured == 'true'
+        run: |
+          for i in $(seq 1 12); do
+            if curl -fsS --max-time 10 "https://${{ secrets.DEPLOY_SSH_HOST }}/health" | grep -q '"ok"'; then
+              echo "Health check passed"; exit 0
+            fi
+            echo "Attempt $i failed; retrying in 10s..."; sleep 10
+          done
+          echo "::error::Backend /health did not become healthy after deploy"
+          exit 1

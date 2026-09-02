@@ -13,6 +13,10 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      # Local dev access only (production reaches db via the internal network).
+      # 5433 avoids clashing with any Postgres already bound to host 5432.
+      - "127.0.0.1:5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mela}"]
       interval: 10s
@@ -28,6 +32,9 @@ services:
     command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
     volumes:
       - redis_data:/data
+    ports:
+      # Local dev access only; 6380 avoids clashes with an existing host Redis.
+      - "127.0.0.1:6380:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -80,6 +87,8 @@ services:
     restart: unless-stopped
     command: celery -A app.workers.celery_app worker --loglevel=info --concurrency=4
     env_file: .env
+    environment:
+      MELA_CELERY_WORKER: "1"
     depends_on:
       db:
         condition: service_healthy
@@ -94,7 +103,7 @@ services:
       context: ./mela-express-backend
       dockerfile: Dockerfile
     restart: unless-stopped
-    command: celery -A app.workers.celery_app beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    command: celery -A app.workers.celery_app beat --loglevel=info
     env_file: .env
     depends_on:
       db:

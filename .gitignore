@@ -4,6 +4,7 @@
 .env.*.local
 *.env
 !.env.example
+credentials.json
 
 # ── Python ────────────────────────────────────────────────────────────────────
 __pycache__/
@@ -80,3 +81,9 @@ docker/certbot/
 # ── Celery & Internal ─────────────────────────────────────────────────────────
 celerybeat-schedule*
 .kiro/
+.agents/
+.claude/
+.cursor/
+.devin/
+
+/generated/prisma

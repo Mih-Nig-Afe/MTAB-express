@@ -1,0 +1,53 @@
+name: Deploy frontends to Vercel (staging)
+
+# Staging branch drives preview/staging deployments on Vercel.
+# Required secrets (repo → Settings → Secrets → Actions):
+#   VERCEL_TOKEN
+#   VERCEL_ORG_ID
+#   VERCEL_PROJECT_ID_DASHBOARD
+#   VERCEL_PROJECT_ID_PUBLIC
+
+on:
+  push:
+    branches: [staging]
+  workflow_dispatch:
+
+concurrency:
+  group: vercel-staging
+  cancel-in-progress: true
+
+jobs:
+  deploy-dashboard:
+    name: Dashboard → Vercel (staging)
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy dashboard
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_DASHBOARD }}
+          working-directory: mela-express-dashboard
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          vercel-args: '--prod'
+
+  deploy-public:
+    name: Public portal + Mini App → Vercel (staging)
+    runs-on: ubuntu-latest
+    environment: staging
+    needs: deploy-dashboard
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy public portal
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_PUBLIC }}
+          working-directory: mela-express-public
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          vercel-args: '--prod'
