@@ -1,5 +1,6 @@
 """Alembic environment configuration for async SQLAlchemy."""
 import asyncio
+import os
 from logging.config import fileConfig
 
 from alembic import context
@@ -10,6 +11,12 @@ from app.database import Base  # noqa: F401
 import app.models  # noqa: F401 — ensure all models are registered
 
 config = context.config
+
+# Prefer DATABASE_URL from the environment (local dev) over the value baked
+# into alembic.ini (Docker hostname). Both point at the same schema.
+if os.getenv("DATABASE_URL"):
+    config.set_main_option("sqlalchemy.url", os.environ["DATABASE_URL"])
+
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 

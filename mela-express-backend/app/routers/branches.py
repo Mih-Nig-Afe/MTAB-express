@@ -20,6 +20,16 @@ async def list_branches(
     result = await db.execute(select(Branch).where(Branch.is_active == True))
     return result.scalars().all()
 
+@router.get("/public")
+async def list_public_branches(db: AsyncSession = Depends(get_db)):
+    """Unauthenticated basic branch info (name/city/phone) for customer-facing
+    surfaces like the Telegram bot."""
+    result = await db.execute(select(Branch).where(Branch.is_active == True))
+    return [
+        {"name": b.name, "city": b.city, "phone": b.phone}
+        for b in result.scalars().all()
+    ]
+
 @router.get("/{branch_id}", response_model=BranchOut)
 async def get_branch(
     branch_id: uuid.UUID,

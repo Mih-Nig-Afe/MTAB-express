@@ -1,0 +1,46 @@
+name: Deploy frontends to Vercel (production)
+
+on:
+  push:
+    branches: [production]
+  workflow_dispatch:
+
+concurrency:
+  group: vercel-production
+  cancel-in-progress: true
+
+jobs:
+  deploy-dashboard:
+    name: Dashboard → Vercel (production)
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy dashboard
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_DASHBOARD }}
+          working-directory: mela-express-dashboard
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          vercel-args: '--prod'
+
+  deploy-public:
+    name: Public portal + Mini App → Vercel (production)
+    runs-on: ubuntu-latest
+    environment: production
+    needs: deploy-dashboard
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy public portal
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_PUBLIC }}
+          working-directory: mela-express-public
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          vercel-args: '--prod'

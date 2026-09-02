@@ -10,6 +10,7 @@ from app.schemas import CashCollectRequest, ChapaInitRequest
 from app.dependencies import get_current_user, require_roles, CurrentUser
 from app.exceptions import NotFoundError, ForbiddenError
 from app.services import chapa
+from app.config import settings
 from app.services.notifications import notify_payment_confirmed
 
 router = APIRouter(prefix="/api/payments", tags=["payments"])
@@ -25,7 +26,14 @@ async def collect_cash(
     parcel = await db.get(Parcel, parcel_id)
     if not parcel:
         raise NotFoundError("Parcel not found")
-        
+
+    # Idempotency guard: never double-collect (corrupts reconciliation totals).
+    if parcel.payment_status == PaymentStatus.PAID:
+        raise HTTPException(
+            status_code=409,
+            detail="Payment for this parcel was already collected."
+        )
+
     payment = Payment(
         parcel_id=parcel.id,
         amount=parcel.price,
@@ -56,13 +64,21 @@ async def collect_cash(
 
 @router.post("/chapa/initiate")
 async def initiate_chapa_payment(request: ChapaInitRequest, db: AsyncSession = Depends(get_db)):
-    parcel = await db.get(Parcel, request.parcel_id)
+    # Resolve the parcel by UUID (dashboard) or tracking code (Telegram bot).
+    if request.parcel_id:
+        parcel = await db.get(Parcel, request.parcel_id)
+    elif request.tracking_code:
+        parcel = (await db.execute(
+            select(Parcel).where(Parcel.tracking_code == request.tracking_code.upper())
+        )).scalar_one_or_none()
+    else:
+        raise HTTPException(status_code=422, detail="parcel_id or tracking_code required")
     if not parcel:
         raise NotFoundError("Parcel not found")
-        
+
     sender = await db.get(Customer, parcel.sender_id)
     tx_ref = chapa.new_tx_ref(parcel.id)
-    
+
     payment = Payment(
         parcel_id=parcel.id,
         amount=parcel.price,
@@ -73,7 +89,20 @@ async def initiate_chapa_payment(request: ChapaInitRequest, db: AsyncSession = D
     db.add(payment)
     await db.commit()
     await db.refresh(payment)
-    
+
+    # No Chapa credentials configured.
+    if not settings.chapa_secret_key:
+        if settings.environment == "production":
+            raise HTTPException(status_code=503, detail="Payment provider not configured")
+        # Dev stub: confirm instantly so the whole bot flow is testable locally.
+        payment.status = PaymentStatus.PAID
+        payment.override_reason = "DEV MODE: no Chapa key configured — auto-confirmed"
+        payment.verified_at = datetime.now(timezone.utc)
+        parcel.payment_status = PaymentStatus.PAID
+        await db.commit()
+        return {"checkout_url": None, "dev_confirmed": True,
+                "tracking_code": parcel.tracking_code, "tx_ref": tx_ref}
+
     checkout_url = await chapa.initiate_checkout(
         amount=float(parcel.price),
         tx_ref=tx_ref,
@@ -81,7 +110,7 @@ async def initiate_chapa_payment(request: ChapaInitRequest, db: AsyncSession = D
         customer_phone=sender.phone if sender else "+251900000000",
         return_url="https://t.me/YourMelaExpressBot"
     )
-    
+
     return {"checkout_url": checkout_url, "tx_ref": tx_ref}
 
 

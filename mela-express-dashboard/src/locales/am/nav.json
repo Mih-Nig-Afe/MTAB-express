@@ -1,0 +1,20 @@
+{
+  "admin_section": "አስተዳደር",
+  "branch_hub": "የቅርንጫፍ ማዕከል",
+  "branches": "ቅርንጫፎች",
+  "cash": "የጥሬ ገንዘብ ሂሳብ",
+  "cash_short": "ጥሬ ገንዘብ",
+  "create_manifest": "ማኒፌስት ፍጠር",
+  "dashboard": "ዳሽቦርድ",
+  "headquarters_admin": "ማዕከላዊ መስሪያ ቤት",
+  "logout": "ውጣ",
+  "manifests": "ማኒፌስቶች",
+  "new_parcel": "+ አዲስ እቃ",
+  "overrides": "የማለፊያ ምዝገባ",
+  "parcels": "እቃዎች",
+  "reports": "ሪፖርቶችና ትንታኔ",
+  "staff": "ሰራተኞች",
+  "ops_nav": "የአሠራር KPI",
+  "scan_nav": "የስካን ጣቢያ",
+  "user_fallback": "ተጠቃሚ"
+}

@@ -1,0 +1,22 @@
+{
+  "amount_due": "Amount Due",
+  "amount_label": "Amount",
+  "avg_delivery_days": "Avg Delivery Days",
+  "balanced": "BALANCED",
+  "branch_breakdown": "Branch Breakdown",
+  "branch_name": "Branch",
+  "cash": "Cash Reconciliation",
+  "collected_cash_msg": "Collected {amount} successfully.",
+  "collected_cash_title": "Cash Collected",
+  "drawer_status": "Drawer Status",
+  "end_date": "End Date",
+  "failed_record_cash": "Failed to record cash payment.",
+  "network_performance": "Network Performance",
+  "start_date": "Start Date",
+  "total_collected": "Total Cash Collected",
+  "total_revenue": "Total Revenue",
+  "transactions": "Transactions",
+  "cash_subtitle": "Audit physical counter cash collected across branch counters.",
+  "cash_load_error": "Failed to load cash reconciliation data.",
+  "cash_daily_breakdown": "Daily breakdown"
+}

@@ -1,4 +1,5 @@
 'use client';
+import { useTranslation } from '@/lib/i18n';
 import { useState } from 'react';
 import useSWR from 'swr';
 import { api } from '@/lib/api';
@@ -9,6 +10,7 @@ import { useToast } from '@/components/ui/Toast';
 const fetcher = (url: string) => api.get(url).then(res => res.data);
 
 export default function StaffPage() {
+  const { t } = useTranslation();
   const toast = useToast();
   const { data: staffList, error, mutate, isLoading } = useSWR<Staff[]>('/staff', fetcher);
   const { data: branches } = useSWR<Branch[]>('/branches', fetcher);
@@ -31,7 +33,7 @@ export default function StaffPage() {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Staff Management</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('staff_management')}</h1>
             <p className="text-sm text-gray-500 mt-1">Manage operators, branch managers, drivers, and administrative credentials.</p>
           </div>
           <button 
@@ -43,15 +45,16 @@ export default function StaffPage() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto rounded-xl border border-gray-200">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Branch Assigned</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Contact Phone</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('name')}</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('role')}</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('branch')}</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('phone')}</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('status')}</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 bg-white">
@@ -84,6 +87,7 @@ export default function StaffPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
 
         {isModalOpen && (
@@ -104,6 +108,7 @@ export default function StaffPage() {
 }
 
 function StaffModal({ staff, branches, onClose, onSave }: any) {
+  const { t } = useTranslation();
   const toast = useToast();
   const [formData, setFormData] = useState(staff || {
     name: '', phone: '', email: '', password: '', role: 'operator', branch_id: branches[0]?.id || '', is_active: true
@@ -119,7 +124,7 @@ function StaffModal({ staff, branches, onClose, onSave }: any) {
         const payload = { ...formData };
         if (!payload.password) delete payload.password;
         await api.patch(`/staff/${staff.id}`, payload);
-        onSave(`Staff member ${formData.name} updated!`);
+        onSave(`${t('staff_saved')}: ${formData.name}`);
       } else {
         if (!formData.password) {
           toast.warning('Password is required when creating a new staff user.', 'Missing Password');
@@ -127,7 +132,7 @@ function StaffModal({ staff, branches, onClose, onSave }: any) {
           return;
         }
         await api.post('/staff', formData);
-        onSave(`New staff member ${formData.name} created!`);
+        onSave(`${t('staff_saved')}: ${formData.name}`);
       }
     } catch (err: any) {
       toast.error(err.response?.data?.detail || 'Failed to save staff member');
@@ -139,10 +144,10 @@ function StaffModal({ staff, branches, onClose, onSave }: any) {
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white p-6 sm:p-8 rounded-2xl w-full max-w-md shadow-2xl border border-gray-100 max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-bold text-gray-900 mb-5">{staff ? 'Edit Staff Member' : 'Create Staff Member'}</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-5">{staff ? t('edit_staff') : t('add_staff')}</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">Full Name</label>
+            <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">{t('name')}</label>
             <input 
               required 
               type="text" 
@@ -153,7 +158,7 @@ function StaffModal({ staff, branches, onClose, onSave }: any) {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">Phone Number (Login)</label>
+            <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">{t('phone_number')}</label>
             <input 
               required 
               type="text" 
@@ -166,7 +171,7 @@ function StaffModal({ staff, branches, onClose, onSave }: any) {
           
           <div>
             <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">
-              {staff ? 'Password (Leave blank to keep unchanged)' : 'Password'}
+              {staff ? t('password_hint') : t('password')}
             </label>
             <div className="relative">
               <input 
@@ -188,20 +193,20 @@ function StaffModal({ staff, branches, onClose, onSave }: any) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">Role</label>
+              <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">{t('role')}</label>
               <select 
                 value={formData.role} 
                 onChange={e => setFormData({...formData, role: e.target.value})} 
                 className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none"
               >
-                <option value="operator">Operator</option>
-                <option value="manager">Manager</option>
-                <option value="driver">Driver</option>
-                <option value="admin">Admin</option>
+                <option value="operator">{t('role_operator')}</option>
+                <option value="manager">{t('role_manager')}</option>
+                <option value="driver">{t('role_driver')}</option>
+                <option value="admin">{t('role_admin')}</option>
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">Branch</label>
+              <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">{t('branch')}</label>
               <select 
                 value={formData.branch_id || ''} 
                 onChange={e => setFormData({...formData, branch_id: e.target.value})} 
@@ -221,7 +226,7 @@ function StaffModal({ staff, branches, onClose, onSave }: any) {
               onChange={e => setFormData({...formData, is_active: e.target.checked})} 
               className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
             />
-            <label htmlFor="staff_active" className="text-sm font-semibold text-gray-700">Active Account</label>
+            <label htmlFor="staff_active" className="text-sm font-semibold text-gray-700">{t('active_account')}</label>
           </div>
 
           <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
@@ -230,14 +235,14 @@ function StaffModal({ staff, branches, onClose, onSave }: any) {
               onClick={onClose} 
               className="px-4 py-2 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-100 transition"
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button 
               type="submit" 
               disabled={saving}
               className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold shadow-sm transition disabled:opacity-50"
             >
-              {saving ? 'Saving...' : 'Save Staff'}
+              {saving ? t('loading') : t('save')}
             </button>
           </div>
         </form>

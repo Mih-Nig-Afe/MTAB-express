@@ -3,8 +3,9 @@ from datetime import datetime, timedelta, timezone
 from celery import shared_task
 from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
+from app.core.state_machine import LINEHAUL_STATUSES
 from app.database import AsyncSessionLocal
-from app.models import Parcel, ParcelStatus, Branch, StaffUser, StaffRole
+from app.models import Parcel, ParcelStatus, Branch, StaffUser, StaffRole, Customer, PickupReminderLog
 from app.workers.notification_tasks import send_telegram_notification, send_sms_notification
 
 async def _check_transit_delays_async():
@@ -15,7 +16,7 @@ async def _check_transit_delays_async():
         stmt = select(Parcel).options(
             selectinload(Parcel.destination_branch)
         ).where(
-            Parcel.status == ParcelStatus.IN_TRANSIT,
+            Parcel.status.in_(tuple(LINEHAUL_STATUSES)),
             Parcel.updated_at <= threshold_time
         )
         
@@ -71,6 +72,62 @@ async def _daily_manager_digest_async():
             for manager in managers:
                 send_sms_notification.delay(manager.phone, msg)
 
+
+async def _pickup_reminders_async():
+    """Daily sender+receiver reminders while a parcel sits ready for pickup."""
+    from app.core.pickup_reminders import reminder_day_number, reminder_due
+    from app.i18n import t
+    from app.services.notifications import notify_parcel_parties
+
+    async with AsyncSessionLocal() as db:
+        now = datetime.now(timezone.utc)
+        stmt = select(Parcel).where(Parcel.status == ParcelStatus.READY_FOR_PICKUP)
+        parcels = (await db.execute(stmt)).scalars().all()
+        for parcel in parcels:
+            if not reminder_due(
+                ready_at=parcel.pickup_ready_at or parcel.updated_at,
+                last_sent_at=parcel.last_pickup_reminder_at,
+                now=now,
+                already_sent=int(parcel.pickup_reminders_sent or 0),
+            ):
+                continue
+            dest = await db.get(Branch, parcel.destination_branch_id)
+            sender = await db.get(Customer, parcel.sender_id)
+            receiver = await db.get(Customer, parcel.receiver_id) if parcel.receiver_id else None
+            day = reminder_day_number(parcel.pickup_ready_at or now, now)
+            remaining_days = max(0, 7 - day)
+            branch_name = dest.name if dest else ""
+            lang = getattr(receiver, "language", None) or getattr(sender, "language", None) or "en"
+            text = t("notify.pickup_reminder", lang=lang).format(
+                code=parcel.tracking_code,
+                branch=branch_name,
+                day=day,
+                remaining=remaining_days,
+            )
+            await notify_parcel_parties(
+                db=db,
+                sender=sender,
+                receiver=receiver,
+                receiver_phone=parcel.receiver_phone,
+                tracking_code=parcel.tracking_code,
+                branch_name=branch_name,
+                parcel_id=parcel.id,
+                message=text,
+            )
+            parcel.pickup_reminders_sent = int(parcel.pickup_reminders_sent or 0) + 1
+            parcel.last_pickup_reminder_at = now
+            for role in ("sender", "receiver"):
+                db.add(
+                    PickupReminderLog(
+                        parcel_id=parcel.id,
+                        day_number=day,
+                        recipient_role=role,
+                        channel="auto",
+                        status="sent",
+                    )
+                )
+        await db.commit()
+
 @shared_task
 def check_transit_delays():
     """Celery task to check transit delays."""
@@ -80,3 +137,8 @@ def check_transit_delays():
 def daily_manager_digest():
     """Celery task to send daily manager digest."""
     asyncio.run(_daily_manager_digest_async())
+
+
+@shared_task(name="app.workers.alert_tasks.send_pickup_reminders")
+def send_pickup_reminders():
+    asyncio.run(_pickup_reminders_async())
