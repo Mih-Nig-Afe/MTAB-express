@@ -9,6 +9,7 @@ from barcode import Code128
 from barcode.writer import SVGWriter
 
 from app.config import settings
+from app.core.brand import brand_name, brand_short
 
 
 def track_url(tracking_code: str) -> str:
@@ -60,7 +61,7 @@ def sticker_html(parcel_data: dict) -> str:
 </style></head><body>
 <div class="box">
   <div class="hdr">
-    <div><h1>MELA EXPRESS</h1><small>Scan at every checkpoint</small></div>
+    <div><h1>{brand_name() or brand_short()}</h1><small>Scan at every checkpoint</small></div>
     <div style="text-align:right"><div class="badge">{parcel_data.get('payment_badge', 'PAY')}</div>
     <div style="font-size:9px;margin-top:4px">{parcel_data.get('created_at', '')}</div></div>
   </div>

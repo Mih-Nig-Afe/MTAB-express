@@ -3,7 +3,7 @@
   "track_subtitle": "Enter your tracking code to see live shipment status.",
   "tracking_code": "Tracking Code",
   "track_button": "Track Parcel",
-  "enter_code": "Enter code e.g. MEX-HW-000482",
+  "enter_code": "Enter code e.g. {{trackingExample}}",
   "not_found_title": "Parcel Not Found",
   "not_found_body": "We could not find a parcel with tracking code \"{code}\". Please double-check and try again.",
   "try_again": "Try Another Code",

@@ -14,6 +14,7 @@ import uuid
 import httpx
 
 from app.config import settings
+from app.core.brand import brand_short
 
 
 class ChapaError(Exception):
@@ -87,4 +88,4 @@ def verify_webhook_signature(raw_body: bytes, signature_header: str) -> bool:
 
 def new_tx_ref(parcel_id: uuid.UUID) -> str:
     """Unique, non-guessable transaction reference tied to the parcel."""
-    return f"mela-{parcel_id}-{uuid.uuid4().hex[:8]}"
+    return f"{brand_short().lower() or 'tx'}-{parcel_id}-{uuid.uuid4().hex[:8]}"

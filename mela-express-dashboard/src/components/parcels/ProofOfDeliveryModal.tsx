@@ -3,6 +3,7 @@ import React, { useState, useRef } from 'react';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/Toast';
 import { Parcel } from '@/types';
+import { useTranslation } from '@/lib/i18n';
 
 interface PoDModalProps {
   parcel: Parcel;
@@ -11,6 +12,7 @@ interface PoDModalProps {
 }
 
 export default function ProofOfDeliveryModal({ parcel, onClose, onSuccess }: PoDModalProps) {
+  const { t } = useTranslation();
   const toast = useToast();
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
@@ -70,10 +72,10 @@ export default function ProofOfDeliveryModal({ parcel, onClose, onSuccess }: PoD
     setGeneratingOtp(true);
     try {
       const res = await api.post(`/parcels/${parcel.id}/otp`);
-      toast.info(`OTP generated: ${res.data.pickup_otp} (Sent to receiver ${res.data.receiver_phone})`, 'OTP Dispatched');
+      toast.info(t('otp_generated_msg', { otp: String(res.data.pickup_otp ?? ''), phone: String(res.data.receiver_phone ?? '') }), t('otp_dispatched'));
       setOtp(res.data.pickup_otp); // Autofill for convenience in dev/testing
     } catch (err: any) {
-      toast.error('Failed to generate OTP code');
+      toast.error(t('failed_otp'));
     } finally {
       setGeneratingOtp(false);
     }
@@ -81,7 +83,7 @@ export default function ProofOfDeliveryModal({ parcel, onClose, onSuccess }: PoD
 
   const handleVerifyAndDeliver = async () => {
     if (!otp.trim()) {
-      toast.warning('Please enter the 6-digit verification OTP provided by the receiver.', 'Missing OTP');
+      toast.warning(t('enter_otp_please'), t('missing_otp'));
       return;
     }
 
@@ -96,14 +98,14 @@ export default function ProofOfDeliveryModal({ parcel, onClose, onSuccess }: PoD
         otp: otp.trim(),
         signature_url: signatureUrl,
         photo_url: '',
-        notes: 'Handover verified and signed at destination counter'
+        notes: t('pod_notes')
       });
 
-      toast.success(`Parcel ${parcel.tracking_code} delivered successfully!`, 'Handover Complete');
+      toast.success(t('parcel_delivered_msg', { code: parcel.tracking_code }), t('handover_complete'));
       onSuccess();
     } catch (err: any) {
-      const detail = err.response?.data?.detail || 'Failed to verify handover OTP.';
-      toast.error(typeof detail === 'string' ? detail : JSON.stringify(detail), 'Verification Failed');
+      const detail = err.response?.data?.detail || t('failed_verify_otp');
+      toast.error(typeof detail === 'string' ? detail : JSON.stringify(detail), t('verification_failed'));
     } finally {
       setLoading(false);
     }
@@ -114,8 +116,8 @@ export default function ProofOfDeliveryModal({ parcel, onClose, onSuccess }: PoD
       <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-gray-100 max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h3 className="font-extrabold text-gray-900 text-xl">🔐 Handover & Proof of Delivery</h3>
-            <p className="text-xs text-gray-500 mt-0.5">Tracking: <span className="font-mono font-bold text-blue-600">{parcel.tracking_code}</span></p>
+            <h3 className="font-extrabold text-gray-900 text-xl">🔐 {t('pod_title')}</h3>
+            <p className="text-xs text-gray-500 mt-0.5">{t('tracking_colon')}: <span className="font-mono font-bold text-blue-600">{parcel.tracking_code}</span></p>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 font-bold text-lg">✕</button>
         </div>
@@ -124,7 +126,7 @@ export default function ProofOfDeliveryModal({ parcel, onClose, onSuccess }: PoD
           {/* Receiver Info Banner */}
           <div className="bg-blue-50/70 border border-blue-200/60 p-4 rounded-2xl flex items-center justify-between">
             <div>
-              <span className="text-xs text-blue-700 font-bold uppercase block">Authorized Receiver</span>
+              <span className="text-xs text-blue-700 font-bold uppercase block">{t('authorized_receiver')}</span>
               <p className="font-bold text-gray-900 text-sm mt-0.5">{parcel.receiver_name}</p>
               <p className="font-mono text-xs text-gray-600">{parcel.receiver_phone}</p>
             </div>
@@ -134,14 +136,14 @@ export default function ProofOfDeliveryModal({ parcel, onClose, onSuccess }: PoD
               disabled={generatingOtp}
               className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded-xl shadow-sm transition"
             >
-              {generatingOtp ? 'Sending...' : '📲 Send OTP Code'}
+              {generatingOtp ? t('sending') : `📲 ${t('send_otp')}`}
             </button>
           </div>
 
           {/* OTP Input */}
           <div>
             <label className="block text-xs font-bold text-gray-700 uppercase mb-2">
-              Enter 6-Digit Pickup OTP
+              {t('enter_six_otp')}
             </label>
             <input
               type="text"
@@ -157,7 +159,7 @@ export default function ProofOfDeliveryModal({ parcel, onClose, onSuccess }: PoD
           <div>
             <div className="flex justify-between items-center mb-2">
               <label className="block text-xs font-bold text-gray-700 uppercase">
-                Receiver Signature Pad
+                {t('signature_pad')}
               </label>
               {hasSigned && (
                 <button
@@ -165,7 +167,7 @@ export default function ProofOfDeliveryModal({ parcel, onClose, onSuccess }: PoD
                   onClick={clearSignature}
                   className="text-xs text-rose-600 hover:text-rose-800 font-semibold"
                 >
-                  Clear Pad
+                  {t('clear_pad')}
                 </button>
               )}
             </div>
@@ -185,7 +187,7 @@ export default function ProofOfDeliveryModal({ parcel, onClose, onSuccess }: PoD
               />
               {!hasSigned && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-gray-400 text-xs font-medium">
-                  ✍️ Sign with finger or mouse here
+                  ✍️ {t('sign_here_hint')}
                 </div>
               )}
             </div>
@@ -198,7 +200,7 @@ export default function ProofOfDeliveryModal({ parcel, onClose, onSuccess }: PoD
               onClick={onClose}
               className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-2xl text-sm transition"
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               type="button"
@@ -206,7 +208,7 @@ export default function ProofOfDeliveryModal({ parcel, onClose, onSuccess }: PoD
               disabled={loading}
               className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-sm shadow-md shadow-emerald-500/20 disabled:opacity-50 transition"
             >
-              {loading ? 'Verifying...' : '✓ Confirm & Handover'}
+              {loading ? t('verifying') : `✓ ${t('confirm_handover')}`}
             </button>
           </div>
         </div>

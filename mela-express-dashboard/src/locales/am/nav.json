@@ -6,7 +6,7 @@
   "cash_short": "ጥሬ ገንዘብ",
   "create_manifest": "ማኒፌስት ፍጠር",
   "dashboard": "ዳሽቦርድ",
-  "headquarters_admin": "ማዕከላዊ መስሪያ ቤት",
+  "headquarters_admin": "{{brandName}} ዋና መሥሪያ ቤት",
   "logout": "ውጣ",
   "manifests": "ማኒፌስቶች",
   "new_parcel": "+ አዲስ እቃ",
@@ -16,5 +16,8 @@
   "staff": "ሰራተኞች",
   "ops_nav": "የአሠራር KPI",
   "scan_nav": "የስካን ጣቢያ",
-  "user_fallback": "ተጠቃሚ"
+  "user_fallback": "ተጠቃሚ",
+  "system_admin_name": "የሥርዓት አስተዳዳሪ",
+  "meta_dashboard_title": "{{brandName}} ዳሽቦርድ",
+  "meta_dashboard_fallback": "የአሠራር ዳሽቦርድ"
 }

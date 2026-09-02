@@ -15,5 +15,20 @@
   "start_date": "መጀመሪያ ቀን",
   "total_collected": "ጠቅላላ የተሰበሰበ ጥሬ ገንዘብ",
   "total_revenue": "ጠቅላላ ገቢ",
-  "transactions": "ግብይቶች"
+  "transactions": "ግብይቶች",
+  "cash_subtitle": "በቅርንጫፎች የተሰበሰበ ጥሬ ገንዘብ ይገምግሙ።",
+  "cash_load_error": "የጥሬ ገንዘብ ሂሳብ መረጃ መጫን አልተቻለም።",
+  "cash_daily_breakdown": "የዕለት ትንተና",
+  "reports_subtitle": "የከተሞች መካከል የማዕከል ፍሰት፣ መጠን እና የተገኘ ገቢ።",
+  "total_network_volume": "ጠቅላላ የአውታረ መረብ መጠን",
+  "registered_all_hubs": "በሁሉም ማዕከሎች የተመዘገቡ",
+  "gross_revenue": "ጠቅላላ ገቢ",
+  "total_paid_fees": "የተከፈሉ የማጓጓዣ ክፍያዎች",
+  "handed_over": "በተሳካ ሁኔታ የተረከቡ",
+  "active_on_highways": "በመንገድ ላይ ያሉ",
+  "branch_hub_col": "ቅርንጫፍ / ማዕከል",
+  "share_of_network": "ከአውታረ መረቡ ድርሻ",
+  "loading_metrics": "መለኪያዎች በመጫን ላይ...",
+  "no_branch_performance": "የቅርንጫፍ አፈጻጸም መዝገብ አልተገኘም።",
+  "n_parcels": "{{count}} እቃዎች"
 }

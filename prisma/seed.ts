@@ -25,7 +25,7 @@ import {
 
 const prisma = new PrismaClient();
 
-const MOCK_PREFIX = 'MEX-MK-';
+const MOCK_PREFIX = `${(process.env.TRACKING_PREFIX || process.env.BRAND_SHORT || 'MK').toUpperCase()}-MK-`;
 const BRANCH_CODES = ['HW', 'AA1', 'AA2', 'AA3', 'AA4', 'AD', 'DD', 'JJ'];
 const CONTENT_CATS: content_category_enum[] = [
   'documents',

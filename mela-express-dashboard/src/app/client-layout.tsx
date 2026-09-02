@@ -5,6 +5,7 @@ import { User } from '@/types';
 import { ToastProvider } from '@/components/ui/Toast';
 import { I18nProvider } from '@/lib/i18n';
 import LanguageSyncer from '@/i18n/LanguageSyncer';
+import { BrandProvider } from '@/components/BrandProvider';
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -16,10 +17,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   return (
     <AuthContext.Provider value={{ user, setUser }}>
       <I18nProvider>
-        <LanguageSyncer />
-        <ToastProvider>
-          {children}
-        </ToastProvider>
+        <BrandProvider>
+          <LanguageSyncer />
+          <ToastProvider>
+            {children}
+          </ToastProvider>
+        </BrandProvider>
       </I18nProvider>
     </AuthContext.Provider>
   );

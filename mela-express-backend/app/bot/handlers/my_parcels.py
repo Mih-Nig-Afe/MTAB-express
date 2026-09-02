@@ -33,7 +33,7 @@ async def send_my_parcels(message, context: ContextTypes.DEFAULT_TYPE):
             response.raise_for_status()
             parcels = response.json()
 
-        btn = mini_app_button("🚀 Open Mela Mini App" if lang == "en" else "🚀 ሜላ መተግበሪያ")
+        btn = mini_app_button(msg(lang, "bot.mini_app_open"))
         keyboard = InlineKeyboardMarkup([[btn]]) if btn else None
 
         if not parcels:

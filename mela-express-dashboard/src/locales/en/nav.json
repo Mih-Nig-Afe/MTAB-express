@@ -6,7 +6,7 @@
   "cash_short": "Cash",
   "create_manifest": "Create Manifest",
   "dashboard": "Dashboard",
-  "headquarters_admin": "Mela Express HQ",
+  "headquarters_admin": "{{brandName}} HQ",
   "logout": "Logout",
   "manifests": "Manifests",
   "new_parcel": "+ New Parcel",
@@ -16,5 +16,8 @@
   "staff": "Staff Users",
   "ops_nav": "Operations KPI",
   "scan_nav": "Scan Station",
-  "user_fallback": "User"
+  "user_fallback": "User",
+  "system_admin_name": "System Admin",
+  "meta_dashboard_title": "{{brandName}} Dashboard",
+  "meta_dashboard_fallback": "Operations Dashboard"
 }

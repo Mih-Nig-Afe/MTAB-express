@@ -3,7 +3,7 @@
   "track_subtitle": "የመከታተያ ኮድዎን ያስገቡ።",
   "tracking_code": "የመከታተያ ኮድ",
   "track_button": "እቃ ተከታተል",
-  "enter_code": "ኮድ ያስገቡ ለምሳሌ MEX-HW-000482",
+  "enter_code": "ኮድ ያስገቡ ለምሳሌ {{trackingExample}}",
   "not_found_title": "እቃው አልተገኘም",
   "not_found_body": "በ\"{code}\" የመከታተያ ኮድ እቃ አላገኘንም። እባክዎ ያረጋግጡ።",
   "try_again": "ሌላ ኮድ ይሞክሩ",

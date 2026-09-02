@@ -41,12 +41,9 @@ export const createClient = (request: NextRequest) => {
 };
 
 export const updateSession = async (request: NextRequest) => {
-  const { supabase, supabaseResponse } = createClient(request);
-
-  // IMPORTANT: do not run code between createClient and getUser()
-  await supabase.auth.getUser();
-
-  // IMPORTANT: return the supabaseResponse so refreshed auth cookies
-  // are propagated to the browser.
+  if (!supabaseUrl || !supabaseKey) {
+    return NextResponse.next({ request: { headers: request.headers } });
+  }
+  const { supabaseResponse } = createClient(request);
   return supabaseResponse;
 };

@@ -8,6 +8,8 @@
 
 import i18next from "i18next";
 
+import { brandFromEnv, toI18nVars } from "@brand";
+
 import enNav from "@/locales/en/nav.json";
 import enAuth from "@/locales/en/auth.json";
 import enDashboard from "@/locales/en/dashboard.json";
@@ -43,7 +45,7 @@ void i18next.init({
   // Flat keys only — dots in keys are literal, matching legacy usage.
   keySeparator: false,
   nsSeparator: false,
-  interpolation: { escapeValue: false },
+  interpolation: { escapeValue: false, defaultVariables: toI18nVars(brandFromEnv(process.env, "NEXT_PUBLIC_")) },
   saveMissing: process.env.NODE_ENV === "development",
   missingKeyHandler: (_lngs, _ns, key) => {
     // eslint-disable-next-line no-console

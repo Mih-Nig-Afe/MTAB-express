@@ -30,7 +30,7 @@ export default function Branches() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{t('branch_management')}</h1>
-            <p className="text-sm text-gray-500 mt-1">Manage hub locations, city hubs, and contact details.</p>
+            <p className="text-sm text-gray-500 mt-1">{t('branches_subtitle')}</p>
           </div>
           {isAdmin && (
           <button 
@@ -52,7 +52,7 @@ export default function Branches() {
                 <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('city')}</th>
                 <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('phone')} & {t('email')}</th>
                 <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('facility_type')}</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('status')}</th>
                 <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('actions')}</th>
               </tr>
             </thead>
@@ -72,12 +72,12 @@ export default function Branches() {
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-700 uppercase">
-                      {b.facility_type || 'branch'}{b.airport_iata ? ` · ${b.airport_iata}` : ''}
+                      {b.facility_type === 'airport' ? t('facility_airport') : b.facility_type === 'sorting_hub' ? t('facility_hub') : t('facility_branch')}{b.airport_iata ? ` · ${b.airport_iata}` : ''}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${b.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
-                      {b.is_active ? 'Active' : 'Inactive'}
+                      {b.is_active ? t('active') : t('inactive')}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm font-medium">
@@ -85,7 +85,7 @@ export default function Branches() {
                       onClick={() => openModal(b)} 
                       className="text-blue-600 hover:text-blue-800 font-semibold"
                     >
-                      Edit
+                      {t('edit')}
                     </button>
                   </td>
                 </tr>
@@ -102,7 +102,7 @@ export default function Branches() {
             onSave={(msg: string) => { 
               mutate(); 
               setIsModalOpen(false); 
-              toast.success(msg, 'Branch Saved');
+              toast.success(msg, t('branch_saved_title'));
             }} 
           />
         )}
@@ -126,13 +126,13 @@ function BranchModal({ branch, onClose, onSave }: any) {
     try {
       if (branch?.id) {
         await api.patch(`/branches/${branch.id}`, formData);
-        onSave(`Branch ${formData.name} updated successfully!`);
+        onSave(t('branch_saved'));
       } else {
         await api.post('/branches', formData);
-        onSave(`Branch ${formData.name} created successfully!`);
+        onSave(t('branch_saved'));
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.detail || 'Failed to save branch');
+      toast.error(err.response?.data?.detail || t('failed_save_branch'));
     } finally {
       setSaving(false);
     }
@@ -141,7 +141,7 @@ function BranchModal({ branch, onClose, onSave }: any) {
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white p-6 sm:p-8 rounded-2xl w-full max-w-md shadow-2xl border border-gray-100">
-        <h2 className="text-xl font-bold text-gray-900 mb-5">{branch ? 'Edit Branch' : 'Create New Branch'}</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-5">{branch ? t('edit_branch') : t('create_new_branch')}</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -202,7 +202,7 @@ function BranchModal({ branch, onClose, onSave }: any) {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">Phone</label>
+            <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">{t('phone')}</label>
             <input 
               type="text" 
               placeholder="e.g. +251111223344"
@@ -227,14 +227,14 @@ function BranchModal({ branch, onClose, onSave }: any) {
               onClick={onClose} 
               className="px-4 py-2 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-100 transition"
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button 
               type="submit" 
               disabled={saving}
               className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold shadow-sm transition disabled:opacity-50"
             >
-              {saving ? 'Saving...' : 'Save Branch'}
+              {saving ? t('saving') : t('save_branch')}
             </button>
           </div>
         </form>

@@ -33,5 +33,9 @@
   "error_backend.Customer not found": "Customer not found",
   "error_backend.Invalid credentials": "Invalid phone number or password",
   "error_backend.Not enough permissions": "You do not have permission for this action",
-  "error_backend.Payment for this parcel was already collected.": "Payment already collected."
+  "error_backend.Payment for this parcel was already collected.": "Payment already collected.",
+  "toast_success": "Success",
+  "toast_error": "Error",
+  "toast_info": "Info",
+  "toast_warning": "Warning"
 }

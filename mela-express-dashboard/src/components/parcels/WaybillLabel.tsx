@@ -3,6 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { Parcel } from '@/types';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import { api } from '@/lib/api';
+import { useBrand } from '@/components/BrandProvider';
+import { displayName } from '@brand';
+import { useTranslation, labelFor } from '@/lib/i18n';
 
 interface WaybillProps {
   parcel: Parcel;
@@ -12,6 +15,8 @@ interface WaybillProps {
 }
 
 export default function WaybillLabel({ parcel, originName, destName, onClose }: WaybillProps) {
+  const { t } = useTranslation();
+  const brand = useBrand();
   const [barcodeUrl, setBarcodeUrl] = useState('');
   const [qrUrl, setQrUrl] = useState('');
 
@@ -57,10 +62,10 @@ export default function WaybillLabel({ parcel, originName, destName, onClose }: 
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 print:p-0 print:bg-white print:static">
       <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-gray-100 print:shadow-none print:border-none print:p-0 print:max-w-none">
         <div className="flex justify-between items-center mb-4 print:hidden">
-          <h3 className="font-bold text-gray-900 text-lg">Thermal Waybill Sticker (4×6&quot;)</h3>
+          <h3 className="font-bold text-gray-900 text-lg">{t('waybill_title')}</h3>
           <div className="flex gap-2">
             <button onClick={handlePrint} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl text-sm transition">
-              Print Sticker
+              {t('print_sticker')}
             </button>
             {onClose && (
               <button onClick={onClose} className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-3 py-2 rounded-xl text-sm transition">✕</button>
@@ -71,24 +76,24 @@ export default function WaybillLabel({ parcel, originName, destName, onClose }: 
         <div className="border-4 border-black p-5 rounded-xl bg-white text-black font-sans print:border-4 print:w-[380px] mx-auto print:rounded-none">
           <div className="flex justify-between items-center border-b-2 border-black pb-3">
             <div>
-              <h1 className="text-2xl font-black tracking-tighter">MELA EXPRESS</h1>
-              <p className="text-[10px] font-bold tracking-wider uppercase text-gray-600">Scan at every checkpoint</p>
+              <h1 className="text-2xl font-black tracking-tighter">{displayName(brand)}</h1>
+              <p className="text-[10px] font-bold tracking-wider uppercase text-gray-600">{t('scan_checkpoint')}</p>
             </div>
             <div className="text-right">
               <span className="text-xs font-mono font-bold block">{formatDate(parcel.created_at)}</span>
               <span className={`text-[11px] font-extrabold uppercase px-2 py-0.5 border border-black rounded ${parcel.payment_status === 'paid' ? 'bg-black text-white' : 'bg-white text-black'}`}>
-                {parcel.payment_status === 'paid' ? 'PAID' : 'COLLECT'}
+                {parcel.payment_status === 'paid' ? t('paid_badge') : t('collect_badge')}
               </span>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2 border-b-2 border-black py-3 text-center">
             <div className="border-r-2 border-black pr-2">
-              <span className="text-[10px] font-bold uppercase block text-gray-600">FROM</span>
+              <span className="text-[10px] font-bold uppercase block text-gray-600">{t('from_short')}</span>
               <span className="text-xl font-black uppercase tracking-tight block truncate">{originName}</span>
             </div>
             <div className="pl-2">
-              <span className="text-[10px] font-bold uppercase block text-gray-600">TO</span>
+              <span className="text-[10px] font-bold uppercase block text-gray-600">{t('to_short')}</span>
               <span className="text-xl font-black uppercase tracking-tight block truncate">{destName}</span>
             </div>
           </div>
@@ -112,11 +117,11 @@ export default function WaybillLabel({ parcel, originName, destName, onClose }: 
 
           <div className="grid grid-cols-2 gap-3 py-3 border-b-2 border-black text-xs">
             <div>
-              <span className="font-bold uppercase text-[10px] block text-gray-600">SENDER</span>
+              <span className="font-bold uppercase text-[10px] block text-gray-600">{t('sender_label')}</span>
               <p className="font-semibold">{parcel.sender_phone || '—'}</p>
             </div>
             <div>
-              <span className="font-bold uppercase text-[10px] block text-gray-600">RECEIVER</span>
+              <span className="font-bold uppercase text-[10px] block text-gray-600">{t('receiver_label')}</span>
               <p className="font-black text-sm">{parcel.receiver_name}</p>
               <p className="font-mono font-bold text-xs">{parcel.receiver_phone}</p>
             </div>
@@ -124,16 +129,16 @@ export default function WaybillLabel({ parcel, originName, destName, onClose }: 
 
           <div className="flex justify-between items-center pt-3 text-xs">
             <div>
-              <span className="text-[10px] font-bold uppercase text-gray-600 block">BILLABLE</span>
-              <span className="font-black text-base">{parcel.chargeable_weight_kg || parcel.weight_kg || 1} KG</span>
+              <span className="text-[10px] font-bold uppercase text-gray-600 block">{t('billable_short')}</span>
+              <span className="font-black text-base">{parcel.chargeable_weight_kg || parcel.weight_kg || 1} {t('kg_short')}</span>
             </div>
             <div>
-              <span className="text-[10px] font-bold uppercase text-gray-600 block">FEE</span>
+              <span className="text-[10px] font-bold uppercase text-gray-600 block">{t('fee_short')}</span>
               <span className="font-black text-base">{formatCurrency(parcel.price)}</span>
             </div>
             <div className="text-right">
-              <span className="text-[10px] font-bold uppercase text-gray-600 block">SIZE</span>
-              <span className="font-bold uppercase">{parcel.size_category || '—'}</span>
+              <span className="text-[10px] font-bold uppercase text-gray-600 block">{t('size_short')}</span>
+              <span className="font-bold uppercase">{parcel.size_category ? labelFor(t, 'size_', parcel.size_category) : '—'}</span>
             </div>
           </div>
         </div>

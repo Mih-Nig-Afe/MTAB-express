@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import useSWR from 'swr';
 import { api } from '@/lib/api';
@@ -11,6 +11,11 @@ import Link from 'next/link';
 
 const fetcher = (url: string) => api.get(url).then(res => res.data);
 
+function LoadingFallback() {
+  const { t } = useTranslation();
+  return <div className="text-center py-10 text-gray-500">{t('loading')}</div>;
+}
+
 const ALL_STATUSES: ParcelStatus[] = [
   'created', 'received_at_origin', 'processed_at_origin', 'dispatched_from_origin',
   'in_transit', 'arrived_origin_airport', 'checked_in_flight', 'departed',
@@ -19,6 +24,14 @@ const ALL_STATUSES: ParcelStatus[] = [
 ];
 
 export default function ParcelsPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <ParcelsPageContent />
+    </Suspense>
+  );
+}
+
+function ParcelsPageContent() {
   const searchParams = useSearchParams();
   const [status, setStatus] = useState('');
   const [search, setSearch] = useState('');

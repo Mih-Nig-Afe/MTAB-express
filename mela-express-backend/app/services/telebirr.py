@@ -6,6 +6,7 @@ import base64
 import httpx
 from datetime import datetime, timezone
 from app.config import settings
+from app.core.brand import sms_sender_id
 
 class TelebirrService:
     def __init__(self):
@@ -31,6 +32,6 @@ class TelebirrService:
 
     def generate_cbe_qr_string(self, parcel_id: str, amount: float, tracking_code: str) -> str:
         """Generates CBE Birr dynamic QR code payload string."""
-        return f"cbebirr://pay?till=890123&ref={tracking_code}&amt={amount}&name=MelaExpress"
+        return f"cbebirr://pay?till=890123&ref={tracking_code}&amt={amount}&name={sms_sender_id()}"
 
 telebirr_service = TelebirrService()

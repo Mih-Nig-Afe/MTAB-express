@@ -1,5 +1,5 @@
 'use client';
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation, labelFor } from '@/lib/i18n';
 import { useState } from 'react';
 import useSWR from 'swr';
 import { api } from '@/lib/api';
@@ -24,7 +24,7 @@ export default function StaffPage() {
   };
 
   const getBranchName = (id?: string) => {
-    if (!id) return 'All Hubs (Admin)';
+    if (!id) return t('all_hubs_admin');
     return branches?.find(b => b.id === id)?.name || id.substring(0, 8);
   };
 
@@ -34,13 +34,13 @@ export default function StaffPage() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{t('staff_management')}</h1>
-            <p className="text-sm text-gray-500 mt-1">Manage operators, branch managers, drivers, and administrative credentials.</p>
+            <p className="text-sm text-gray-500 mt-1">{t('staff_subtitle')}</p>
           </div>
           <button 
             onClick={() => openModal()} 
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition"
           >
-            + New Staff Member
+            + {t('new_staff')}
           </button>
         </div>
 
@@ -59,20 +59,20 @@ export default function StaffPage() {
             </thead>
             <tbody className="divide-y divide-gray-100 bg-white">
               {isLoading ? (
-                <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-400 text-sm">Loading staff members...</td></tr>
+                <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-400 text-sm">{t('loading_staff')}</td></tr>
               ) : staffList?.map(s => (
                 <tr key={s.id} className="hover:bg-gray-50/50 transition">
                   <td className="px-6 py-4 text-sm font-semibold text-gray-900">{s.name}</td>
                   <td className="px-6 py-4 text-sm">
                     <span className="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 capitalize">
-                      {s.role}
+                      {labelFor(t, 'role_', s.role)}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 font-medium">{getBranchName(s.branch_id)}</td>
                   <td className="px-6 py-4 text-sm font-mono text-gray-600">{s.phone}</td>
                   <td className="px-6 py-4 text-sm">
                     <span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${s.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
-                      {s.is_active ? 'Active' : 'Inactive'}
+                      {s.is_active ? t('active') : t('inactive')}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm font-medium">
@@ -80,7 +80,7 @@ export default function StaffPage() {
                       onClick={() => openModal(s)} 
                       className="text-blue-600 hover:text-blue-800 font-semibold"
                     >
-                      Edit
+                      {t('edit')}
                     </button>
                   </td>
                 </tr>
@@ -98,7 +98,7 @@ export default function StaffPage() {
             onSave={(msg: string) => { 
               mutate(); 
               setIsModalOpen(false); 
-              toast.success(msg, 'Staff Updated');
+              toast.success(msg, t('staff_updated_title'));
             }} 
           />
         )}
@@ -127,7 +127,7 @@ function StaffModal({ staff, branches, onClose, onSave }: any) {
         onSave(`${t('staff_saved')}: ${formData.name}`);
       } else {
         if (!formData.password) {
-          toast.warning('Password is required when creating a new staff user.', 'Missing Password');
+          toast.warning(t('password_required_new'), t('missing_password'));
           setSaving(false);
           return;
         }
@@ -135,7 +135,7 @@ function StaffModal({ staff, branches, onClose, onSave }: any) {
         onSave(`${t('staff_saved')}: ${formData.name}`);
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.detail || 'Failed to save staff member');
+      toast.error(err.response?.data?.detail || t('failed_save_staff'));
     } finally {
       setSaving(false);
     }
@@ -176,7 +176,7 @@ function StaffModal({ staff, branches, onClose, onSave }: any) {
             <div className="relative">
               <input 
                 type={showPassword ? 'text' : 'password'}
-                placeholder={staff ? '••••••••' : 'Minimum 6 characters'}
+                placeholder={staff ? '••••••••' : t('min_password')}
                 value={formData.password || ''} 
                 onChange={e => setFormData({...formData, password: e.target.value})} 
                 className="w-full border border-gray-300 rounded-xl px-3 py-2 pr-10 text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" 
@@ -212,7 +212,7 @@ function StaffModal({ staff, branches, onClose, onSave }: any) {
                 onChange={e => setFormData({...formData, branch_id: e.target.value})} 
                 className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none"
               >
-                <option value="">None (HQ/Admin)</option>
+                <option value="">{t('none_hq_admin')}</option>
                 {branches.map((b: any) => <option key={b.id} value={b.id}>{b.name}</option>)}
               </select>
             </div>

@@ -18,5 +18,17 @@
   "transactions": "Transactions",
   "cash_subtitle": "Audit physical counter cash collected across branch counters.",
   "cash_load_error": "Failed to load cash reconciliation data.",
-  "cash_daily_breakdown": "Daily breakdown"
+  "cash_daily_breakdown": "Daily breakdown",
+  "reports_subtitle": "Inter-city hub throughput, volume distributions, and generated revenue.",
+  "total_network_volume": "Total Network Volume",
+  "registered_all_hubs": "Registered across all hubs",
+  "gross_revenue": "Gross Revenue",
+  "total_paid_fees": "Total paid delivery fees",
+  "handed_over": "Successfully handed over",
+  "active_on_highways": "Active on highways",
+  "branch_hub_col": "Branch / Hub",
+  "share_of_network": "Share of Network",
+  "loading_metrics": "Loading performance metrics...",
+  "no_branch_performance": "No branch performance records found.",
+  "n_parcels": "{{count}} parcels"
 }

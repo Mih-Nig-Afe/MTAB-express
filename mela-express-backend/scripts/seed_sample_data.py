@@ -6,6 +6,8 @@ Idempotent: skips any parcel whose tracking_code already exists.
 
 Run inside the api container:
     docker compose -f docker-compose.dev.yml exec api python scripts/seed_sample_data.py
+
+Env: TRACKING_PREFIX / BRAND_* from app settings; SEED_SAMPLE=1 on deploy.
 """
 import asyncio
 import os
@@ -16,6 +18,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sqlalchemy import select
 
+from app.config import settings
 from app.database import AsyncSessionLocal
 from app.models import (
     Branch,
@@ -30,6 +33,8 @@ from app.models import (
     StaffUser,
 )
 
+PREFIX = settings.tracking_prefix.upper()
+
 CUSTOMERS_DATA = [
     {"phone": "+251911234567", "name": "Abebe Kebede"},
     {"phone": "+251922345678", "name": "Hanna Girma"},
@@ -37,26 +42,27 @@ CUSTOMERS_DATA = [
     {"phone": "+251944567890", "name": "Selamawit Alemu"},
 ]
 
-# (code, origin, dest, sender_idx, receiver_name, receiver_phone, receiver_idx,
-#  description, weight, declared_value, price, mode, method, status, history_notes)
+# (suffix_code, origin, dest, sender_idx, receiver_name, receiver_phone,
+#  description, weight, declared_value, price, mode, method, status,
+#  history_notes, days_ago)
 PARCELS_DATA = [
     (
-        "MEX-AA1-483920", "AA1", "HW", 0, "Chaltu Bekele", "+251966789012", None,
+        f"{PREFIX}-AA1-483920", "AA1", "HW", 0, "Chaltu Bekele", "+251966789012",
         "Laptop bag with documents", 2.5, 15000, 180,
         PaymentMode.BEFORE, PaymentMethod.CASH, ParcelStatus.CREATED,
-        ["Parcel registered at Bole branch counter"],
+        ["Parcel registered at Bole branch counter"], 0,
     ),
     (
-        "MEX-HW-271654", "HW", "AA1", 1, "Yonas Haile", "+251977890123", None,
+        f"{PREFIX}-HW-271654", "HW", "AA1", 1, "Yonas Haile", "+251977890123",
         "Traditional habesha kemis (2 pcs)", 4.0, 6000, 320,
         PaymentMode.BEFORE, PaymentMethod.CASH, ParcelStatus.RECEIVED_AT_ORIGIN,
         [
             "Parcel registered at Hawassa branch",
             "Received and scanned at Hawassa warehouse",
-        ],
+        ], 0,
     ),
     (
-        "MEX-AA2-639817", "AA2", "DD", 2, "Meron Abeje", "+251988901234", None,
+        f"{PREFIX}-AA2-639817", "AA2", "DD", 2, "Meron Abeje", "+251988901234",
         "Smartphone (boxed)", 0.8, 45000, 250,
         PaymentMode.BEFORE, PaymentMethod.CHAPA, ParcelStatus.IN_TRANSIT,
         [
@@ -64,10 +70,10 @@ PARCELS_DATA = [
             "Received and scanned at Megenagna warehouse",
             "Loaded on vehicle AA2→AD transfer",
             "Departed Addis Ababa toward Dire Dawa via Adama corridor",
-        ],
+        ], 0,
     ),
     (
-        "MEX-DD-552340", "DD", "JJ", 3, "Kalkidan Fikru", "+251999012345", None,
+        f"{PREFIX}-DD-552340", "DD", "JJ", 3, "Kalkidan Fikru", "+251999012345",
         "Coffee beans (1 kg, vacuum sealed)", 1.2, 900, 210,
         PaymentMode.AFTER, None, ParcelStatus.READY_FOR_PICKUP,
         [
@@ -75,10 +81,10 @@ PARCELS_DATA = [
             "Received and scanned at Dire Dawa warehouse",
             "In transit toward Jimma",
             "Arrived at Jimma branch — ready for pickup",
-        ],
+        ], 1,
     ),
     (
-        "MEX-JJ-908341", "JJ", "AA3", 0, "Biruk Solomon", "+251900123456", None,
+        f"{PREFIX}-JJ-908341", "JJ", "AA3", 0, "Biruk Solomon", "+251900123456",
         "Barber clippers set", 3.5, 8000, 290,
         PaymentMode.AFTER, PaymentMethod.CASH, ParcelStatus.DELIVERED,
         [
@@ -87,30 +93,28 @@ PARCELS_DATA = [
             "In transit toward Addis Ababa",
             "Arrived at Piassa branch — out for delivery",
             "Delivered and signed for by receiver",
-        ],
+        ], 2,
     ),
     (
-        "MEX-AD-114728", "AD", "AA4", 1, "Nahom Zerihun", "+251901234567", None,
+        f"{PREFIX}-AD-114728", "AD", "AA4", 1, "Nahom Zerihun", "+251901234567",
         "Textile rolls (sample batch)", 12.0, 22000, 480,
         PaymentMode.BEFORE, PaymentMethod.CHAPA, ParcelStatus.ON_HOLD,
         [
             "Parcel registered at Adama branch",
             "Placed on hold: incomplete receiver address, awaiting customer call",
-        ],
+        ], 3,
     ),
 ]
 
 
 async def seed_sample_data():
     async with AsyncSessionLocal() as db:
-        # Admin who registers the parcels
         result = await db.execute(select(StaffUser).where(StaffUser.phone == "+251900000000"))
         admin = result.scalar_one_or_none()
         if not admin:
             print("ERROR: run scripts/seed_admin.py first (no admin found).")
             return
 
-        # Branch lookup
         result = await db.execute(select(Branch))
         branches = {b.code: b for b in result.scalars().all()}
         missing = {code for _, o, d, *_ in PARCELS_DATA for code in (o, d)} - set(branches)
@@ -118,7 +122,6 @@ async def seed_sample_data():
             print(f"ERROR: run scripts/seed_branches.py first (missing branches: {missing}).")
             return
 
-        # Customers
         customers = {}
         for c in CUSTOMERS_DATA:
             result = await db.execute(select(Customer).where(Customer.phone == c["phone"]))
@@ -133,11 +136,11 @@ async def seed_sample_data():
             customers[c["phone"]] = cust
 
         now = datetime.now(timezone.utc)
+        today_start = now.replace(hour=8, minute=0, second=0, microsecond=0)
 
-        # Parcels
         for row in PARCELS_DATA:
-            (code, orig, dest, sidx, r_name, r_phone, _ridx,
-             desc, weight, value, price, mode, method, status, history) = row
+            (code, orig, dest, sidx, r_name, r_phone,
+             desc, weight, value, price, mode, method, status, history, days_ago) = row
 
             existing = (await db.execute(
                 select(Parcel).where(Parcel.tracking_code == code)
@@ -147,7 +150,7 @@ async def seed_sample_data():
                 continue
 
             sender = CUSTOMERS_DATA[sidx]["phone"]
-            created_at = now - timedelta(days=len(history) * 2)
+            created_at = today_start - timedelta(days=days_ago)
 
             parcel = Parcel(
                 tracking_code=code,
@@ -173,7 +176,6 @@ async def seed_sample_data():
             db.add(parcel)
             await db.flush()
 
-            # Timeline entries spread over the last days
             for i, note in enumerate(history):
                 db.add(ParcelStatusHistory(
                     parcel_id=parcel.id,
@@ -183,10 +185,9 @@ async def seed_sample_data():
                     changed_by=admin.id,
                     branch_id=branches[orig].id,
                     note=note,
-                    timestamp=created_at + timedelta(hours=i * 14),
+                    timestamp=created_at + timedelta(hours=i * 4),
                 ))
 
-            # Payment record when already paid
             if parcel.payment_status == PaymentStatus.PAID:
                 db.add(Payment(
                     parcel_id=parcel.id,
@@ -200,7 +201,7 @@ async def seed_sample_data():
                 ))
 
             label = f"{status.value}" + (" (payment pending)" if parcel.payment_status == PaymentStatus.PENDING else "")
-            print(f"Added parcel: {code} [{label}]")
+            print(f"Added parcel: {code} [{label}] (created {days_ago}d ago)")
 
         await db.commit()
         print("Sample data seeding completed.")
