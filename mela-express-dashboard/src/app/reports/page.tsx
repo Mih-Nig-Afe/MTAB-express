@@ -1,4 +1,5 @@
 'use client';
+import { useTranslation } from '@/lib/i18n';
 import useSWR from 'swr';
 import { api } from '@/lib/api';
 import RoleGuard from '@/components/layout/RoleGuard';
@@ -7,6 +8,7 @@ import { formatCurrency } from '@/lib/utils';
 const fetcher = (url: string) => api.get(url).then(res => res.data);
 
 export default function Reports() {
+  const { t } = useTranslation();
   const { data, isLoading } = useSWR<any>('/reports/branch-performance', fetcher);
 
   const summary = data?.summary || (data && !data.branch_breakdown ? data : null);
@@ -23,7 +25,7 @@ export default function Reports() {
     <RoleGuard allowedRoles={['admin', 'manager']}>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Branch Performance & Analytics</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('reports')}</h1>
           <p className="text-sm text-gray-500 mt-1">Inter-city hub throughput, volume distributions, and generated revenue.</p>
         </div>
 
@@ -34,7 +36,7 @@ export default function Reports() {
             <p className="text-xs text-gray-400 mt-1">Registered across all hubs</p>
           </div>
           <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-            <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">Gross Revenue</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">Gross {t('revenue_col')}</span>
             <p className="text-3xl font-extrabold text-emerald-600 mt-2">{formatCurrency(totalRevenue)}</p>
             <p className="text-xs text-gray-400 mt-1">Total paid delivery fees</p>
           </div>
@@ -52,15 +54,16 @@ export default function Reports() {
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="p-6 border-b border-gray-100">
-            <h2 className="text-base font-bold text-gray-900">Hub-by-Hub Throughput Table</h2>
+            <h2 className="text-base font-bold text-gray-900">{t('branch_breakdown')}</h2>
           </div>
+          <div className="overflow-x-auto rounded-xl border border-gray-200">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Branch / Hub</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">City</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Handled</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Revenue</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('city')}</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('total_parcels')}</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('revenue_col')}</th>
                 <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Share of Network</th>
               </tr>
             </thead>
@@ -94,6 +97,7 @@ export default function Reports() {
               )}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </RoleGuard>

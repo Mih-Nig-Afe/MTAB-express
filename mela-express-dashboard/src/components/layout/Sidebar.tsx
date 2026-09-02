@@ -4,24 +4,28 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { useTranslation } from '@/lib/i18n';
 
 export default function Sidebar() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   const links = [
-    { href: '/dashboard', label: 'Dashboard', icon: '📊' },
-    { href: '/parcels', label: 'Parcels', icon: '📦' },
-    { href: '/manifests', label: 'Manifests', icon: '📋' },
-    { href: '/cash', label: 'Cash', icon: '💰' },
-    { href: '/reports', label: 'Reports', icon: '📈' },
+    { href: '/dashboard', label: t('dashboard'), icon: '📊' },
+    { href: '/scan', label: t('scan_nav'), icon: '📷' },
+    { href: '/parcels', label: t('parcels'), icon: '📦' },
+    { href: '/manifests', label: t('manifests'), icon: '📋' },
+    { href: '/cash', label: t('cash_short'), icon: '💰' },
+    { href: '/reports', label: t('reports'), icon: '📈' },
   ];
 
   const adminLinks = [
-    { href: '/admin/branches', label: 'Branches', icon: '🏢' },
-    { href: '/admin/staff', label: 'Staff', icon: '👥' },
-    { href: '/admin/overrides', label: 'Overrides', icon: '⚙️' },
+    { href: '/admin/operations', label: t('ops_nav'), icon: '⏱' },
+    { href: '/admin/branches', label: t('branches'), icon: '🏢' },
+    { href: '/admin/staff', label: t('staff'), icon: '👥' },
+    { href: '/admin/overrides', label: t('overrides'), icon: '⚙️' },
   ];
 
   const isAdmin = user?.role === 'admin' || user?.role === 'manager';
@@ -45,7 +49,7 @@ export default function Sidebar() {
           {isAdmin && (
             <>
               <div className="pt-4 pb-2">
-                <p className="px-4 text-xs font-semibold tracking-wider text-gray-500 uppercase">Admin</p>
+                <p className="px-4 text-xs font-semibold tracking-wider text-gray-500 uppercase">{t('admin_section')}</p>
               </div>
               {adminLinks.map((link) => (
                 <Link key={link.href} href={link.href} className={cn("flex items-center px-4 py-2 text-sm font-medium rounded-md", pathname.startsWith(link.href) ? "bg-blue-50 text-blue-700" : "text-gray-700 hover:bg-gray-50")}>
