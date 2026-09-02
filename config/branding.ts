@@ -72,3 +72,8 @@ export function toI18nVars(brand: BrandConfig): Record<string, string> {
 export function displayName(brand: BrandConfig): string {
   return brand.brandName || brand.brandShort || "";
 }
+
+/** Strip trailing /api so /public/* routes resolve on the API host root. */
+export function apiOrigin(apiUrl: string): string {
+  return apiUrl.replace(/\/api\/?$/, "").replace(/\/$/, "");
+}

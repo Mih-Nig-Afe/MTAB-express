@@ -7,6 +7,7 @@ import {
   brandFromEnv,
   displayName,
   toI18nVars,
+  apiOrigin,
   type BrandConfig,
 } from "@brand";
 
@@ -32,7 +33,7 @@ export function applyBrandToI18n(brand: BrandConfig): void {
 }
 
 export async function loadBrandFromApi(apiUrl: string): Promise<BrandConfig> {
-  const base = apiUrl.replace(/\/$/, "");
+  const base = apiOrigin(apiUrl);
   const res = await fetch(`${base}/public/brand`, { next: { revalidate: 300 } });
   if (!res.ok) throw new Error(`Brand config fetch failed: ${res.status}`);
   const brand = brandFromApi(await res.json());
