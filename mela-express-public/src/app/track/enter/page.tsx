@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation, LanguageToggle } from '@/lib/i18n';
 import { useRouter } from "next/navigation";
 
 export default function EnterTrackingPage() {
+  const { t } = useTranslation();
   const [code, setCode] = useState("");
   const router = useRouter();
 
@@ -19,7 +21,7 @@ export default function EnterTrackingPage() {
       <header className="bg-blue-600 text-white p-4 shadow-md">
         <div className="max-w-3xl mx-auto flex items-center">
           <span className="text-2xl mr-2">📦</span>
-          <h1 className="text-xl font-bold">Mela Express</h1>
+          <h1 className="text-xl font-bold">{t('brand')}</h1>
         </div>
       </header>
 
@@ -39,7 +41,7 @@ export default function EnterTrackingPage() {
               <input
                 id="trackingCode"
                 type="text"
-                placeholder="e.g. MEX-HW-000482"
+                placeholder={t('enter_code')}
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
@@ -57,7 +59,7 @@ export default function EnterTrackingPage() {
       </main>
 
       <footer className="py-6 text-center text-sm text-gray-500">
-        <p>Powered by Mela Express</p>
+        <p>{t('powered_by')}</p>
       </footer>
     </div>
   );
