@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import useSWR from 'swr';
 import { useParams, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
@@ -17,7 +17,15 @@ import Link from 'next/link';
 
 const fetcher = (url: string) => api.get(url).then(res => res.data);
 
-export default function ParcelDetail() {
+export default function ParcelDetailPage() {
+  return (
+    <Suspense fallback={<div className="text-center py-10 text-gray-500">Loading…</div>}>
+      <ParcelDetail />
+    </Suspense>
+  );
+}
+
+function ParcelDetail() {
   const { id } = useParams();
   const searchParams = useSearchParams();
   const toast = useToast();
