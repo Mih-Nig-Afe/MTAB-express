@@ -1,0 +1,23 @@
+{
+  "status_created": "ተፈጠረ",
+  "status_received_at_origin": "በመነሻ ተቀባይነት ተሰጥቷል",
+  "status_in_transit": "በጉዞ ላይ",
+  "status_processed_at_origin": "በመነሻ ተከናውኗል",
+  "status_dispatched_from_origin": "ከመነሻ ወጥቷል",
+  "status_arrived_origin_airport": "ወደ መነሻ አየር ማረፊያ",
+  "status_checked_in_flight": "በበረራ ተመዝግቧል",
+  "status_departed": "በአየር ላይ",
+  "status_arrived_destination_airport": "አርፏል",
+  "status_released_from_airport": "ከአየር ማረፊያ ወጥቷል",
+  "status_distributed_to_branch": "በመድረሻ ቅርንጫፍ",
+  "status_arrived_at_destination": "ወደ መድረሻ ደርሷል",
+  "status_ready_for_pickup": "ለመቀበል ዝግጁ",
+  "status_delivered": "ተደርሷል",
+  "status_returned": "ተመልሷል",
+  "status_cancelled": "ተሰርዟል",
+  "status_lost": "ጠፍቷል",
+  "status_on_hold": "ቆም ብሏል",
+  "payment_pending": "በመጠባበቅ ላይ",
+  "payment_paid": "ተከፍሏል",
+  "payment_failed": "አልተሳካም"
+}
