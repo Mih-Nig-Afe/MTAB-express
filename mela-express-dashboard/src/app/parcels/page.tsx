@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import useSWR from 'swr';
 import { api } from '@/lib/api';
@@ -19,6 +19,14 @@ const ALL_STATUSES: ParcelStatus[] = [
 ];
 
 export default function ParcelsPage() {
+  return (
+    <Suspense fallback={<div className="text-center py-10 text-gray-500">Loading…</div>}>
+      <ParcelsPageContent />
+    </Suspense>
+  );
+}
+
+function ParcelsPageContent() {
   const searchParams = useSearchParams();
   const [status, setStatus] = useState('');
   const [search, setSearch] = useState('');
