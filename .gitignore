@@ -87,3 +87,5 @@ celerybeat-schedule*
 .devin/
 
 /generated/prisma
+.vercel
+.env*
