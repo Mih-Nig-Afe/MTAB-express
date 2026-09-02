@@ -23,8 +23,8 @@ class TelebirrService:
             "currency": "ETB",
             "subject": f"Delivery Fee for {tracking_code}",
             "short_code": self.short_code,
-            "notify_url": f"{settings.api_v1_str}/payments/telebirr/webhook",
-            "return_url": f"https://mela-express.com/track/{tracking_code}?paid=true",
+            "notify_url": f"{settings.app_base_url.rstrip('/')}/api/payments/telebirr/webhook",
+            "return_url": f"{settings.public_portal_url.rstrip('/')}/track/{tracking_code}?paid=true",
             "timestamp": int(datetime.now(timezone.utc).timestamp()),
             "checkout_url": f"https://telebirr.et/pay?trade_no={out_trade_no}&amount={amount}"
         }

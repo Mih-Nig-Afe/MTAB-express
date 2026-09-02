@@ -23,6 +23,7 @@ celery_app.conf.update(
         "app.workers.payment_tasks",
         "app.workers.alert_tasks",
         "app.workers.pdf_tasks",
+        "app.workers.flight_tasks",
     ],
 )
 

@@ -6,12 +6,15 @@ import logging
 logger = logging.getLogger(__name__)
 
 @shared_task(bind=True, max_retries=3)
-def send_telegram_notification(self, chat_id: str, text: str):
+def send_telegram_notification(self, chat_id: str, text: str, reply_markup: dict | None = None):
     """Sends a Telegram message using the bot token."""
     url = f"https://api.telegram.org/bot{settings.telegram_bot_token}/sendMessage"
+    payload: dict = {"chat_id": chat_id, "text": text}
+    if reply_markup:
+        payload["reply_markup"] = reply_markup
     
     try:
-        response = httpx.post(url, json={"chat_id": chat_id, "text": text}, timeout=10)
+        response = httpx.post(url, json=payload, timeout=10)
         response.raise_for_status()
     except httpx.HTTPError as exc:
         logger.error(f"Telegram API failed: {exc}")
