@@ -1,7 +1,9 @@
 'use client';
+import { useTranslation } from '@/lib/i18n';
 import { useState } from 'react';
 import useSWR from 'swr';
 import { api } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
 import RoleGuard from '@/components/layout/RoleGuard';
 import { Branch } from '@/types';
 import { useToast } from '@/components/ui/Toast';
@@ -9,7 +11,10 @@ import { useToast } from '@/components/ui/Toast';
 const fetcher = (url: string) => api.get(url).then(res => res.data);
 
 export default function Branches() {
+  const { t } = useTranslation();
+  const { user } = useAuth();
   const toast = useToast();
+  const isAdmin = user?.role === 'admin';
   const { data: branches, error, mutate, isLoading } = useSWR<Branch[]>('/branches', fetcher);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
@@ -24,32 +29,38 @@ export default function Branches() {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Branch Management</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('branch_management')}</h1>
             <p className="text-sm text-gray-500 mt-1">Manage hub locations, city hubs, and contact details.</p>
           </div>
+          {isAdmin && (
           <button 
             onClick={() => openModal()} 
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition"
           >
-            + New Branch
+            + {t('add_branch')}
           </button>
+          )}
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto rounded-xl border border-gray-200">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Code</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Branch Name</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">City / Hub</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Phone & Email</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('code')}</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('branch_name')}</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('city')}</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('phone')} & {t('email')}</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('facility_type')}</th>
                 <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 bg-white">
               {isLoading ? (
-                <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-400 text-sm">Loading branches...</td></tr>
+                <tr><td colSpan={7} className="px-6 py-8 text-center text-gray-400 text-sm">{t('loading')}</td></tr>
+              ) : error ? (
+                <tr><td colSpan={7} className="px-6 py-8 text-center text-rose-500 text-sm">{t('branches_load_error')}</td></tr>
               ) : branches?.map(b => (
                 <tr key={b.id} className="hover:bg-gray-50/50 transition">
                   <td className="px-6 py-4 text-sm font-mono font-bold text-blue-600">{b.code}</td>
@@ -58,6 +69,11 @@ export default function Branches() {
                   <td className="px-6 py-4 text-sm text-gray-500">
                     <div>{b.phone || '-'}</div>
                     <div className="text-xs text-gray-400">{b.email || ''}</div>
+                  </td>
+                  <td className="px-6 py-4 text-sm">
+                    <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-700 uppercase">
+                      {b.facility_type || 'branch'}{b.airport_iata ? ` · ${b.airport_iata}` : ''}
+                    </span>
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${b.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
@@ -76,6 +92,7 @@ export default function Branches() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
 
         {isModalOpen && (
@@ -95,9 +112,11 @@ export default function Branches() {
 }
 
 function BranchModal({ branch, onClose, onSave }: any) {
+  const { t } = useTranslation();
   const toast = useToast();
   const [formData, setFormData] = useState(branch || {
-    name: '', code: '', city: '', address: '', phone: '', email: '', is_active: true
+    name: '', code: '', city: '', address: '', phone: '', email: '',
+    facility_type: 'branch', airport_iata: '', is_active: true
   });
   const [saving, setSaving] = useState(false);
 
@@ -126,7 +145,7 @@ function BranchModal({ branch, onClose, onSave }: any) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">Branch Code</label>
+              <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">{t('code')}</label>
               <input 
                 required 
                 type="text" 
@@ -137,7 +156,7 @@ function BranchModal({ branch, onClose, onSave }: any) {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">City</label>
+              <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">{t('city')}</label>
               <input 
                 required 
                 type="text" 
@@ -149,7 +168,7 @@ function BranchModal({ branch, onClose, onSave }: any) {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">Branch Name</label>
+            <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">{t('branch_name')}</label>
             <input 
               required 
               type="text" 
@@ -157,6 +176,29 @@ function BranchModal({ branch, onClose, onSave }: any) {
               value={formData.name} 
               onChange={e => setFormData({...formData, name: e.target.value})} 
               className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" 
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">{t('facility_type')}</label>
+            <select
+              value={formData.facility_type || 'branch'}
+              onChange={e => setFormData({ ...formData, facility_type: e.target.value })}
+              className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+            >
+              <option value="branch">{t('facility_branch')}</option>
+              <option value="airport">{t('facility_airport')}</option>
+              <option value="sorting_hub">{t('facility_hub')}</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">{t('airport_iata')}</label>
+            <input
+              type="text"
+              maxLength={4}
+              placeholder="ADD"
+              value={formData.airport_iata || ''}
+              onChange={e => setFormData({ ...formData, airport_iata: e.target.value.toUpperCase() })}
+              className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm font-mono bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>
           <div>
@@ -177,7 +219,7 @@ function BranchModal({ branch, onClose, onSave }: any) {
               onChange={e => setFormData({...formData, is_active: e.target.checked})} 
               className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
             />
-            <label htmlFor="branch_active" className="text-sm font-semibold text-gray-700">Active Branch</label>
+            <label htmlFor="branch_active" className="text-sm font-semibold text-gray-700">{t('active')}</label>
           </div>
           <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
             <button 
