@@ -1,6 +1,6 @@
-# Mela Express
+# MTAB Express
 
-Full digital operations and tracking platform for a multi-branch parcel delivery company operating across Ethiopia.
+Full digital operations and tracking platform for a multi-branch parcel delivery company operating across Ethiopia. Branding is configured via environment variables — see `.env.example`.
 
 ## Quick Start
 
