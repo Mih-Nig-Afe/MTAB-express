@@ -19,16 +19,19 @@ export default function EnterTrackingPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <header className="bg-blue-600 text-white p-4 shadow-md">
-        <div className="max-w-3xl mx-auto flex items-center">
-          <span className="text-2xl mr-2">📦</span>
-          <h1 className="text-xl font-bold">{t('brand')}</h1>
+        <div className="max-w-3xl mx-auto flex items-center justify-between">
+          <div className="flex items-center">
+            <span className="text-2xl mr-2">📦</span>
+            <h1 className="text-xl font-bold">{t('brand')}</h1>
+          </div>
+          <LanguageToggle />
         </div>
       </header>
 
       <main className="flex-grow flex items-center justify-center p-4">
         <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
           <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
-            Track Your Parcel
+            {t('track_title')}
           </h2>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
@@ -36,7 +39,7 @@ export default function EnterTrackingPage() {
                 htmlFor="trackingCode"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Tracking Code
+                {t('tracking_code')}
               </label>
               <input
                 id="trackingCode"
@@ -52,7 +55,7 @@ export default function EnterTrackingPage() {
               type="submit"
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition"
             >
-              Track Parcel
+              {t('track_button')}
             </button>
           </form>
         </div>

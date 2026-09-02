@@ -33,5 +33,9 @@
   "error_backend.Customer not found": "ደንበኛው አልተገኘም",
   "error_backend.Invalid credentials": "የስልክ ቁጥሩ ወይም የይለፍ ቃሉ ተሳስቷል",
   "error_backend.Not enough permissions": "ለዚህ ተግባር ፈቃድ የለዎትም",
-  "error_backend.Payment for this parcel was already collected.": "ክፍያው አስቀድሞ ተከፍሏል።"
+  "error_backend.Payment for this parcel was already collected.": "ክፍያው አስቀድሞ ተከፍሏል።",
+  "toast_success": "ተሳክቷል",
+  "toast_error": "ስህተት",
+  "toast_info": "መረጃ",
+  "toast_warning": "ማስጠንቀቂያ"
 }

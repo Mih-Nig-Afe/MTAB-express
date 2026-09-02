@@ -1,17 +1,19 @@
 'use client';
 import { useAuth, logout } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation, labelFor } from '@/lib/i18n';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
-import { useBrand } from '@/components/BrandProvider';
-import { displayName } from '@brand';
 
 export default function TopBar() {
   const { user, setUser } = useAuth();
   const router = useRouter();
   const { t } = useTranslation();
-  const brand = useBrand();
-  const company = displayName(brand);
+  const displayUser =
+    !user?.name
+      ? t('user_fallback')
+      : user.name.trim().toLowerCase() === 'system admin'
+        ? t('system_admin_name')
+        : user.name;
 
   const handleLogout = () => {
     logout();
@@ -25,11 +27,7 @@ export default function TopBar() {
         <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
           <span className="text-xl">🏢</span>
           <span>
-            {user?.branch_id
-              ? t('branch_hub')
-              : company
-                ? `${company} HQ`
-                : t('headquarters_admin')}
+            {user?.branch_id ? t('branch_hub') : t('headquarters_admin')}
           </span>
         </h2>
       </div>
@@ -39,9 +37,9 @@ export default function TopBar() {
         <LanguageSwitcher />
 
         <div className="text-right hidden sm:block">
-          <p className="text-sm font-bold text-gray-900">{user?.name || t('user_fallback')}</p>
+          <p className="text-sm font-bold text-gray-900">{displayUser}</p>
           <p className="text-xs text-blue-600 font-semibold uppercase">
-            {user?.role ? (t(`role_${user.role}`) === `role_${user.role}` ? user.role : t(`role_${user.role}`)) : ''}
+            {user?.role ? labelFor(t, 'role_', user.role) : ''}
           </p>
         </div>
 

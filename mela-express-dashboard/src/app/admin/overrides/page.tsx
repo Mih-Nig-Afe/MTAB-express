@@ -17,7 +17,7 @@ export default function Overrides() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{t('overrides')}</h1>
-          <p className="text-sm text-gray-500 mt-1">Audit log of manager fee overrides, waiver authorizations, and cash counter exceptions.</p>
+          <p className="text-sm text-gray-500 mt-1">{t('overrides_subtitle')}</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
@@ -32,7 +32,7 @@ export default function Overrides() {
             </thead>
             <tbody className="divide-y divide-gray-100 bg-white">
               {isLoading ? (
-                <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-400 text-sm">Loading audit logs...</td></tr>
+                <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-400 text-sm">{t('loading_audit')}</td></tr>
               ) : logs && logs.length > 0 ? (
                 logs.map((log: any, idx: number) => (
                   <tr key={log.payment_id || idx} className="hover:bg-gray-50/50 transition">
@@ -51,7 +51,7 @@ export default function Overrides() {
                   </tr>
                 ))
               ) : (
-                <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-400 text-sm">No override logs recorded yet.</td></tr>
+                <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-400 text-sm">{t('no_override_logs')}</td></tr>
               )}
             </tbody>
           </table>

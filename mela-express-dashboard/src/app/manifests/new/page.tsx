@@ -73,12 +73,12 @@ export default function NewManifestPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.origin_branch_id === formData.destination_branch_id) {
-      toast.warning('Origin and destination branches must be different.', 'Validation Error');
+      toast.warning(t('origin_dest_must_differ_manifest'), t('validation_warning_title'));
       return;
     }
 
     if (selectedParcels.size === 0) {
-      toast.warning('Please select at least one parcel to include in this manifest.', 'No Parcels Selected');
+      toast.warning(t('select_one_parcel'), t('no_parcels_selected'));
       return;
     }
 
@@ -89,11 +89,11 @@ export default function NewManifestPage() {
         parcel_ids: Array.from(selectedParcels)
       };
       const res = await api.post('/manifests', payload);
-      toast.success(`Manifest created with ${selectedParcels.size} parcels!`, 'Manifest Dispatched');
+      toast.success(t('manifest_created_count', { count: selectedParcels.size }), t('manifest_dispatched'));
       router.push(`/manifests/${res.data.id}`);
     } catch (err: any) {
-      const detail = err.response?.data?.detail || 'Failed to create manifest.';
-      toast.error(typeof detail === 'string' ? detail : JSON.stringify(detail), 'Creation Failed');
+      const detail = err.response?.data?.detail || t('failed_create_manifest');
+      toast.error(typeof detail === 'string' ? detail : JSON.stringify(detail), t('creation_failed'));
     } finally {
       setSubmitting(false);
     }
@@ -104,7 +104,7 @@ export default function NewManifestPage() {
       <div className="max-w-4xl mx-auto space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{t('create_manifest')}</h1>
-          <p className="text-sm text-gray-500 mt-1">Batch parcels for inter-city transit and assign driver/vehicle.</p>
+          <p className="text-sm text-gray-500 mt-1">{t('manifest_subtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200 space-y-6">
@@ -141,7 +141,7 @@ export default function NewManifestPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">{t('vehicle_plate')} Number</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">{t('vehicle_plate')}</label>
               <input 
                 required 
                 type="text" 
@@ -156,7 +156,7 @@ export default function NewManifestPage() {
           <div>
             <div className="flex justify-between items-center mb-3">
               <label className="block text-sm font-semibold text-gray-700">
-                Select Parcels to Dispatch ({selectedParcels.size} selected)
+                {t('select_parcels_dispatch', { count: selectedParcels.size })}
               </label>
               {availableParcels.length > 0 && (
                 <button
@@ -164,16 +164,16 @@ export default function NewManifestPage() {
                   onClick={toggleAll}
                   className="text-xs font-semibold text-blue-600 hover:text-blue-800"
                 >
-                  {selectedParcels.size === availableParcels.length ? 'Deselect All' : 'Select All'}
+                  {selectedParcels.size === availableParcels.length ? t('deselect_all') : t('select_all')}
                 </button>
               )}
             </div>
 
             {loadingParcels ? (
-              <div className="text-center py-6 text-gray-400 text-sm">Loading available parcels at origin...</div>
+              <div className="text-center py-6 text-gray-400 text-sm">{t('loading_origin_parcels')}</div>
             ) : availableParcels.length === 0 ? (
               <div className="p-4 bg-gray-50 rounded-xl border border-dashed border-gray-300 text-center text-sm text-gray-500">
-                No ready parcels found at this origin branch.
+                {t('no_ready_parcels')}
               </div>
             ) : (
               <div className="border border-gray-200 rounded-xl max-h-64 overflow-y-auto divide-y divide-gray-100">
@@ -188,7 +188,7 @@ export default function NewManifestPage() {
                     <div className="flex-1 flex justify-between items-center text-sm">
                       <span className="font-mono font-medium text-gray-900">{p.tracking_code}</span>
                       <span className="text-gray-500 text-xs">{p.receiver_name} ({p.receiver_phone})</span>
-                      <span className="font-semibold text-gray-700 text-xs">{p.weight_kg} kg</span>
+                      <span className="font-semibold text-gray-700 text-xs">{p.weight_kg} {t('kg_short')}</span>
                     </div>
                   </label>
                 ))}
@@ -202,14 +202,14 @@ export default function NewManifestPage() {
               onClick={() => router.back()} 
               className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl text-sm transition"
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button 
               type="submit" 
               disabled={submitting || selectedParcels.size === 0} 
               className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm shadow-md shadow-blue-500/20 disabled:opacity-50 transition"
             >
-              {submitting ? 'Creating Manifest...' : `Dispatch Manifest (${selectedParcels.size} Parcels)`}
+              {submitting ? t('creating_manifest') : t('dispatch_manifest', { count: selectedParcels.size })}
             </button>
           </div>
         </form>

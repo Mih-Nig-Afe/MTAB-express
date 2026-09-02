@@ -44,8 +44,8 @@ export default function ReceiveManifest() {
           setSelected(new Set(res.data.parcels.map((p: Parcel) => p.id)));
         }
       })
-      .catch(() => toast.error('Failed to load manifest details'));
-  }, [id, toast]);
+      .catch(() => toast.error(t('failed_load_manifest')));
+  }, [id, toast, t]);
 
   const handleToggle = (parcelId: string) => {
     const next = new Set(selected);
@@ -72,13 +72,13 @@ export default function ReceiveManifest() {
       const missing = total - received;
 
       if (missing > 0) {
-        toast.warning(`Received ${received} parcels. ${missing} unverified parcels marked ON HOLD.`, 'Bulk Received with Exceptions');
+        toast.warning(t('received_with_hold', { received, missing }), t('bulk_received_exceptions'));
       } else {
-        toast.success(`All ${received} parcels verified and received at destination!`, 'Manifest Received');
+        toast.success(t('all_parcels_received', { count: received }), t('manifest_received'));
       }
       router.push(`/manifests/${id}`);
     } catch (err: any) {
-      toast.error(err.response?.data?.detail || 'Failed to process manifest arrival');
+      toast.error(err.response?.data?.detail || t('failed_process_arrival'));
     } finally {
       setSubmitting(false);
     }
@@ -97,7 +97,7 @@ export default function ReceiveManifest() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{t('receive')} — {t('destination')}</h1>
             <p className="text-sm text-gray-500 mt-1">
-              Verify incoming packages for vehicle <span className="font-semibold text-gray-800">{manifest.vehicle_plate}</span> (Driver: {manifest.driver_name})
+              {t('receive_incoming_hint', { plate: manifest.vehicle_plate, driver: manifest.driver_name })}
             </p>
           </div>
           <button 
@@ -105,7 +105,7 @@ export default function ReceiveManifest() {
             onClick={handleSelectAll}
             className="text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition"
           >
-            {selected.size === parcels.length ? 'Deselect All' : 'Select All'}
+            {selected.size === parcels.length ? t('deselect_all') : t('select_all')}
           </button>
         </div>
 
@@ -129,7 +129,7 @@ export default function ReceiveManifest() {
           </div>
 
           <h2 className="text-sm font-semibold text-gray-700 uppercase">
-            Parcels in Manifest ({selected.size}/{parcels.length} Verified)
+            {t('parcels_in_manifest', { selected: selected.size, total: parcels.length })}
           </h2>
           
           <div className="divide-y divide-gray-100 border border-gray-200 rounded-xl overflow-hidden">
@@ -151,12 +151,12 @@ export default function ReceiveManifest() {
                   <div className="flex-1 flex justify-between items-center text-sm">
                     <div>
                       <span className="font-mono font-bold text-gray-900">{p.tracking_code}</span>
-                      <p className="text-xs text-gray-500 mt-0.5">Receiver: {p.receiver_name} ({p.receiver_phone})</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{t('receiver_label')}: {p.receiver_name} ({p.receiver_phone})</p>
                     </div>
                     <div className="text-right">
-                      <span className="font-semibold text-gray-800 text-xs block">{p.weight_kg} kg</span>
+                      <span className="font-semibold text-gray-800 text-xs block">{p.weight_kg} {t('kg_short')}</span>
                       <span className={`text-xs font-medium ${isChecked ? 'text-emerald-600' : 'text-rose-600'}`}>
-                        {isChecked ? '✓ Verified Present' : '⚠ Missing / Unchecked'}
+                        {isChecked ? t('verified_present') : t('missing_unchecked')}
                       </span>
                     </div>
                   </div>
@@ -171,14 +171,14 @@ export default function ReceiveManifest() {
               onClick={() => router.back()} 
               className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl text-sm transition"
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button 
               onClick={handleSubmit} 
               disabled={submitting} 
               className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm shadow-md shadow-emerald-500/20 disabled:opacity-50 transition"
             >
-              {submitting ? 'Confirming...' : `Confirm Bulk Arrival (${selected.size} Received)`}
+              {submitting ? t('confirming') : t('confirm_bulk_arrival', { count: selected.size })}
             </button>
           </div>
         </div>

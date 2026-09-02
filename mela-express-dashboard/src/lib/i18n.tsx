@@ -11,7 +11,7 @@ export type Language = SupportedLanguage;
 interface I18nContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
+  t: (key: string, vars?: Record<string, string | number>) => string;
 }
 
 const I18nContext = createContext<I18nContextType>({
@@ -52,7 +52,8 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const t = (key: string): string => i18next.t(key);
+  const t = (key: string, vars?: Record<string, string | number>): string =>
+    (vars ? i18next.t(key, vars) : i18next.t(key)) as string;
 
   return (
     <I18nContext.Provider value={{ language, setLanguage, t }}>
@@ -62,6 +63,18 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 }
 
 export const useTranslation = () => useContext(I18nContext);
+
+/** Translate `prefix + value` (e.g. status_in_transit); fall back to a readable raw value. */
+export function labelFor(
+  t: (key: string, vars?: Record<string, string | number>) => string,
+  prefix: string,
+  value?: string | null,
+): string {
+  if (!value) return '';
+  const key = `${prefix}${value}`;
+  const translated = t(key);
+  return translated === key ? value.replace(/_/g, ' ') : translated;
+}
 
 // Named aliases for consumers migrating toward the reference layout.
 export { default as LanguageSwitcher } from "@/components/common/LanguageSwitcher";

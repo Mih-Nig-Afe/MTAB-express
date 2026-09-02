@@ -16,5 +16,8 @@
   "staff": "Staff Users",
   "ops_nav": "Operations KPI",
   "scan_nav": "Scan Station",
-  "user_fallback": "User"
+  "user_fallback": "User",
+  "system_admin_name": "System Admin",
+  "meta_dashboard_title": "{{brandName}} Dashboard",
+  "meta_dashboard_fallback": "Operations Dashboard"
 }

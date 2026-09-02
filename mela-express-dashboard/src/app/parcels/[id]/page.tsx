@@ -11,15 +11,20 @@ import ProofOfDeliveryModal from '@/components/parcels/ProofOfDeliveryModal';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { Parcel, Branch } from '@/types';
 import { useToast } from '@/components/ui/Toast';
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation, labelFor } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import Link from 'next/link';
 
 const fetcher = (url: string) => api.get(url).then(res => res.data);
 
+function LoadingFallback() {
+  const { t } = useTranslation();
+  return <div className="text-center py-10 text-gray-500">{t('loading')}</div>;
+}
+
 export default function ParcelDetailPage() {
   return (
-    <Suspense fallback={<div className="text-center py-10 text-gray-500">Loading…</div>}>
+    <Suspense fallback={<LoadingFallback />}>
       <ParcelDetail />
     </Suspense>
   );
@@ -156,7 +161,7 @@ function ParcelDetail() {
                 </div>
                 <div>
                   <dt className="text-gray-400 text-xs uppercase font-bold tracking-wider">{t('weight_price')}</dt>
-                  <dd className="font-bold text-gray-900 mt-1 text-sm">{parcel.weight_kg || 1} kg — {formatCurrency(parcel.price)}</dd>
+                  <dd className="font-bold text-gray-900 mt-1 text-sm">{parcel.weight_kg || 1} {t('kg_short')} — {formatCurrency(parcel.price)}</dd>
                 </div>
                 <div className="sm:col-span-2">
                   <dt className="text-gray-400 text-xs uppercase font-bold tracking-wider">{t('contents')}</dt>
@@ -303,7 +308,7 @@ function ParcelDetail() {
                 {parcel.flight && (
                   <div className="text-sm border-t border-gray-100 pt-4 space-y-1">
                     <p className="font-bold text-gray-900">{parcel.flight.flight_number} · {parcel.flight.origin_iata || '—'} → {parcel.flight.dest_iata || '—'}</p>
-                    <p className="text-gray-500 capitalize">{parcel.flight.status}{parcel.flight.airline_name ? ` · ${parcel.flight.airline_name}` : ''}</p>
+                    <p className="text-gray-500 capitalize">{labelFor(t, 'status_', parcel.flight.status)}{parcel.flight.airline_name ? ` · ${parcel.flight.airline_name}` : ''}</p>
                     {parcel.flight.latitude != null && parcel.flight.longitude != null && (
                       <p className="text-gray-500">{t('live_position')}: {Number(parcel.flight.latitude).toFixed(3)}, {Number(parcel.flight.longitude).toFixed(3)}</p>
                     )}

@@ -1,5 +1,5 @@
 'use client';
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation, labelFor } from '@/lib/i18n';
 import { useState } from 'react';
 import useSWR from 'swr';
 import { api } from '@/lib/api';
@@ -21,7 +21,7 @@ export default function ManifestsPage() {
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-900">{t('manifests')}</h1>
           <Link href="/manifests/new" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 font-medium text-sm">
-            + New Manifest
+            + {t('new_manifest')}
           </Link>
         </div>
 
@@ -46,7 +46,7 @@ export default function ManifestsPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600"><Link href={`/manifests/${manifest.id}`}>{manifest.id.substring(0,8)}</Link></td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{manifest.origin_branch_id?.substring(0,8)} → {manifest.destination_branch_id?.substring(0,8)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{manifest.driver_name} <br/><span className="text-xs text-gray-500">{manifest.vehicle_plate}</span></td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm"><span className="px-2 py-1 bg-gray-100 rounded-full">{manifest.status}</span></td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm"><span className="px-2 py-1 bg-gray-100 rounded-full">{labelFor(t, 'manifest_status_', manifest.status)}</span></td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(manifest.created_at)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       {manifest.status === 'in_transit' && (

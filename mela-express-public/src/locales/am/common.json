@@ -23,7 +23,7 @@
   "calc_dest_city": "መጠን (ሴ.ሜ)",
   "weight_kg": "ክብደት (ኪ.ግ)",
   "length_cm": "ርዝመት",
-  "width_cm": "عرض",
+  "width_cm": "ስፋት",
   "height_cm": "ቁመት",
   "calculate_price": "ዋጋ ያግኙ",
   "estimated_cost": "ግምታዊ ክፍያ",
@@ -39,5 +39,15 @@
   "show_otp": "OTP አሳይ",
   "confirm_receipt": "ተቀብያለሁ",
   "receipt_ok": "እናመሰግናለን!",
-  "auth_loading": "በመገናኘት ላይ..."
+  "auth_loading": "በመገናኘት ላይ...",
+  "telegram_mini_app": "የቴሌግራም ሚኒ አፕ",
+  "eta_minutes": "ETA: {{count}} {{minutesShort}}",
+  "guest": "እንግዳ",
+  "payment_confirmed": "ክፍያ ተረጋግጧል።",
+  "payment_failed": "ክፍያ አልተሳካም",
+  "could_not_confirm": "ማረጋገጥ አልተቻለም",
+  "failed_to_fetch": "መጫን አልተቻለም",
+  "minutes_short": "ደቂቃ",
+  "meta_track_title": "{{brandName}} — እቃዎን ይከታተሉ",
+  "meta_track_fallback": "እቃዎን ይከታተሉ"
 }

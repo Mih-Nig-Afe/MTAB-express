@@ -1,5 +1,6 @@
 'use client';
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useTranslation } from '@/lib/i18n';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -23,6 +24,7 @@ interface ToastContextType {
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation();
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [mounted, setMounted] = useState(false);
 
@@ -44,10 +46,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     }, 4500);
   }, [removeToast]);
 
-  const success = useCallback((message: string, title?: string) => addToast(message, 'success', title || 'Success'), [addToast]);
-  const error = useCallback((message: string, title?: string) => addToast(message, 'error', title || 'Error'), [addToast]);
-  const info = useCallback((message: string, title?: string) => addToast(message, 'info', title || 'Info'), [addToast]);
-  const warning = useCallback((message: string, title?: string) => addToast(message, 'warning', title || 'Warning'), [addToast]);
+  const success = useCallback((message: string, title?: string) => addToast(message, 'success', title || t('toast_success')), [addToast, t]);
+  const error = useCallback((message: string, title?: string) => addToast(message, 'error', title || t('toast_error')), [addToast, t]);
+  const info = useCallback((message: string, title?: string) => addToast(message, 'info', title || t('toast_info')), [addToast, t]);
+  const warning = useCallback((message: string, title?: string) => addToast(message, 'warning', title || t('toast_warning')), [addToast, t]);
 
   return (
     <ToastContext.Provider value={{ toasts, addToast, removeToast, success, error, info, warning }}>

@@ -6,6 +6,7 @@ import { authApi } from '@/api/authApi';
 import { setTokens, setUser, useAuth } from '@/lib/auth';
 import { useToast } from '@/components/ui/Toast';
 import { useTranslation } from '@/lib/i18n';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { useBrand } from '@/components/BrandProvider';
 import { displayName } from '@brand';
 
@@ -43,7 +44,11 @@ export default function Login() {
       setUser(meRes.data);
       setContextUser(meRes.data);
       
-      toast.success(t('welcome_back_msg').replace('{name}', meRes.data.name), t('signed_in_title'));
+      const welcomeName =
+        meRes.data.name?.trim().toLowerCase() === 'system admin'
+          ? t('system_admin_name')
+          : meRes.data.name;
+      toast.success(t('welcome_back_msg').replace('{name}', welcomeName), t('signed_in_title'));
       router.push('/dashboard');
     } catch (err: any) {
       const status = err.response?.status;
@@ -65,6 +70,9 @@ export default function Login() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 px-4 py-12">
+      <div className="absolute top-4 right-4">
+        <LanguageSwitcher />
+      </div>
       <div className="w-full max-w-md bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl p-8 border border-white/20">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600 text-white text-3xl shadow-lg shadow-blue-500/30 mb-3">

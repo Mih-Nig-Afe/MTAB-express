@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { use } from "react";
 import { API_BASE_URL } from "@/lib/api";
-import { useTranslation, LanguageToggle } from '@/lib/i18n';
+import { useTranslation, LanguageToggle, labelFor } from '@/lib/i18n';
 
 interface StatusEntry {
   to_status: string;
@@ -102,7 +102,7 @@ export default function TrackingPage({
           if (res.status === 404) {
             if (!cancelled) setError(true);
           } else {
-            throw new Error("Failed to fetch");
+            throw new Error(t('failed_to_fetch'));
           }
         } else {
           const data = await res.json();
@@ -156,7 +156,7 @@ export default function TrackingPage({
     for (const c of parcel.checkpoints || []) {
       items.push({
         key: `c-${c.created_at}`,
-        label: t('checkpoint') || 'Route checkpoint',
+        label: t('checkpoint'),
         detail: c.location_name + (c.note ? ` — ${c.note}` : ''),
         at: c.created_at,
         kind: 'checkpoint',
@@ -190,9 +190,9 @@ export default function TrackingPage({
         body: JSON.stringify({ tracking_code: parcel.tracking_code }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Payment failed");
+      if (!res.ok) throw new Error(data.detail || t('payment_failed'));
       if (data.checkout_url) window.location.href = data.checkout_url;
-      else setActionMsg("Payment confirmed.");
+      else setActionMsg(t('payment_confirmed'));
     } catch (e: any) {
       setActionMsg(e.message);
     } finally {
@@ -209,9 +209,9 @@ export default function TrackingPage({
       });
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.detail || "Could not confirm");
+        throw new Error(data.detail || t('could_not_confirm'));
       }
-      setActionMsg(t('receipt_confirmed') || 'Thank you! Delivery confirmed.');
+      setActionMsg(t('receipt_confirmed'));
     } catch (e: any) {
       setActionMsg(e.message);
     }
@@ -237,8 +237,9 @@ export default function TrackingPage({
     }
   };
 
-  const statusDisplay = parcel?.carrier_status_label || parcel?.status_label ||
-    (parcel ? parcel.status.replace(/_/g, ' ') : '');
+  const statusDisplay = parcel
+    ? (labelFor(t, 'status_', parcel.status) || parcel.carrier_status_label || parcel.status_label)
+    : '';
 
   const mapUrl = parcel?.flight?.latitude != null && parcel?.flight?.longitude != null
     ? `https://www.openstreetmap.org/?mlat=${parcel.flight.latitude}&mlon=${parcel.flight.longitude}#map=8/${parcel.flight.latitude}/${parcel.flight.longitude}`
@@ -309,13 +310,13 @@ export default function TrackingPage({
                   {parcel.payment_status === 'pending' && (
                     <button type="button" onClick={handlePay} disabled={payLoading}
                       className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-lg text-sm disabled:opacity-50">
-                      {payLoading ? '...' : (t('pay_now') || 'Pay with Chapa')}
+                      {payLoading ? '...' : t('pay_now')}
                     </button>
                   )}
                   {parcel.status === 'delivered' && (
                     <button type="button" onClick={handleConfirmReceipt}
                       className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg text-sm">
-                      {t('confirm_receipt') || 'Confirm Receipt'}
+                      {t('confirm_receipt')}
                     </button>
                   )}
                 </div>
@@ -349,7 +350,7 @@ export default function TrackingPage({
                 {parcel.flight && (
                   <div className="pt-4 border-t border-gray-100 text-sm space-y-2">
                     <p className="font-semibold">{parcel.flight.flight_number} · {parcel.flight.origin_iata || '—'} → {parcel.flight.dest_iata || '—'}</p>
-                    <p className="text-gray-500 capitalize">{parcel.flight.status}{parcel.flight.airline_name ? ` · ${parcel.flight.airline_name}` : ''}</p>
+                    <p className="text-gray-500 capitalize">{labelFor(t, 'status_', parcel.flight.status)}{parcel.flight.airline_name ? ` · ${parcel.flight.airline_name}` : ''}</p>
                     {mapUrl && (
                       <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-blue-600 font-semibold hover:underline">
                         {t('live_map')} ↗

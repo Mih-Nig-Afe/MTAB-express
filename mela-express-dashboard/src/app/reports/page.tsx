@@ -26,29 +26,29 @@ export default function Reports() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{t('reports')}</h1>
-          <p className="text-sm text-gray-500 mt-1">Inter-city hub throughput, volume distributions, and generated revenue.</p>
+          <p className="text-sm text-gray-500 mt-1">{t('reports_subtitle')}</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-            <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">Total Network Volume</span>
-            <p className="text-3xl font-extrabold text-blue-600 mt-2">{totalVolume} Parcels</p>
-            <p className="text-xs text-gray-400 mt-1">Registered across all hubs</p>
+            <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">{t('total_network_volume')}</span>
+            <p className="text-3xl font-extrabold text-blue-600 mt-2">{t('n_parcels', { count: totalVolume })}</p>
+            <p className="text-xs text-gray-400 mt-1">{t('registered_all_hubs')}</p>
           </div>
           <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-            <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">Gross {t('revenue_col')}</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">{t('gross_revenue')}</span>
             <p className="text-3xl font-extrabold text-emerald-600 mt-2">{formatCurrency(totalRevenue)}</p>
-            <p className="text-xs text-gray-400 mt-1">Total paid delivery fees</p>
+            <p className="text-xs text-gray-400 mt-1">{t('total_paid_fees')}</p>
           </div>
           <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-            <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">Delivered</span>
-            <p className="text-3xl font-extrabold text-teal-600 mt-2">{delivered} Parcels</p>
-            <p className="text-xs text-gray-400 mt-1">Successfully handed over</p>
+            <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">{t('kpi_delivered')}</span>
+            <p className="text-3xl font-extrabold text-teal-600 mt-2">{t('n_parcels', { count: delivered })}</p>
+            <p className="text-xs text-gray-400 mt-1">{t('handed_over')}</p>
           </div>
           <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-            <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">In Transit</span>
-            <p className="text-3xl font-extrabold text-indigo-600 mt-2">{inTransit} Parcels</p>
-            <p className="text-xs text-gray-400 mt-1">Active on highways</p>
+            <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">{t('kpi_in_transit')}</span>
+            <p className="text-3xl font-extrabold text-indigo-600 mt-2">{t('n_parcels', { count: inTransit })}</p>
+            <p className="text-xs text-gray-400 mt-1">{t('active_on_highways')}</p>
           </div>
         </div>
 
@@ -60,16 +60,16 @@ export default function Reports() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Branch / Hub</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('branch_hub_col')}</th>
                 <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('city')}</th>
                 <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('total_parcels')}</th>
                 <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('revenue_col')}</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Share of Network</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('share_of_network')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 bg-white">
               {isLoading ? (
-                <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-400 text-sm">Loading performance metrics...</td></tr>
+                <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-400 text-sm">{t('loading_metrics')}</td></tr>
               ) : branches && branches.length > 0 ? (
                 branches.map((b: any, idx: number) => {
                   const share = totalVolume > 0 ? Math.round(((b.total_parcels || 0) / totalVolume) * 100) : 0;
@@ -79,7 +79,7 @@ export default function Reports() {
                         {b.branch_name} <span className="text-xs text-blue-600 font-mono">({b.branch_code})</span>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">{b.city || '-'}</td>
-                      <td className="px-6 py-4 text-sm font-mono font-medium text-gray-700">{b.total_parcels || 0} Parcels</td>
+                      <td className="px-6 py-4 text-sm font-mono font-medium text-gray-700">{t('n_parcels', { count: b.total_parcels || 0 })}</td>
                       <td className="px-6 py-4 text-sm font-semibold text-emerald-600">{formatCurrency(b.total_revenue || 0)}</td>
                       <td className="px-6 py-4 text-sm text-gray-600">
                         <div className="flex items-center gap-3">
@@ -93,7 +93,7 @@ export default function Reports() {
                   );
                 })
               ) : (
-                <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-400 text-sm">No branch performance records found.</td></tr>
+                <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-400 text-sm">{t('no_branch_performance')}</td></tr>
               )}
             </tbody>
           </table>

@@ -39,5 +39,15 @@
   "show_otp": "Show Pickup Code",
   "confirm_receipt": "Confirm Receipt",
   "receipt_ok": "Thank you! Delivery confirmed.",
-  "auth_loading": "Connecting your Telegram account..."
+  "auth_loading": "Connecting your Telegram account...",
+  "telegram_mini_app": "Telegram Mini App",
+  "eta_minutes": "ETA: {{count}} {{minutesShort}}",
+  "guest": "Guest",
+  "payment_confirmed": "Payment confirmed.",
+  "payment_failed": "Payment failed",
+  "could_not_confirm": "Could not confirm",
+  "failed_to_fetch": "Failed to fetch",
+  "minutes_short": "min",
+  "meta_track_title": "{{brandName}} — Track Your Parcel",
+  "meta_track_fallback": "Track Your Parcel"
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslation, LanguageToggle } from '@/lib/i18n';
+import { useTranslation, LanguageToggle, labelFor } from '@/lib/i18n';
 import { useBrand } from '@/components/BrandProvider';
 import { displayName } from '@brand';
 import React, { useState, useEffect, useCallback } from 'react';
@@ -34,7 +34,7 @@ export default function TelegramMiniApp() {
   const [activeTab, setActiveTab] = useState<Tab>('orders');
   const [authReady, setAuthReady] = useState(false);
   const [authError, setAuthError] = useState('');
-  const [customerName, setCustomerName] = useState('Guest');
+  const [customerName, setCustomerName] = useState('');
 
   const [trackingInput, setTrackingInput] = useState('');
   const [trackingResult, setTrackingResult] = useState<any>(null);
@@ -197,10 +197,10 @@ export default function TelegramMiniApp() {
             <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center font-black">{initial}</div>
             <div>
               <h1 className="font-extrabold text-sm tracking-tight leading-none uppercase">{company}</h1>
-              <p className="text-[10px] text-blue-100 mt-0.5">Telegram Mini App</p>
+              <p className="text-[10px] text-blue-100 mt-0.5">{t('telegram_mini_app')}</p>
             </div>
           </div>
-          <span className="text-xs bg-blue-700/80 px-2.5 py-1 rounded-full text-blue-100">👋 {customerName}</span>
+          <span className="text-xs bg-blue-700/80 px-2.5 py-1 rounded-full text-blue-100">👋 {customerName || t('guest')}</span>
         </div>
       </header>
 
@@ -239,11 +239,11 @@ export default function TelegramMiniApp() {
                   <div className="flex justify-between items-start">
                     <span className="font-mono font-bold text-blue-600 text-sm">{p.tracking_code}</span>
                     <span className="text-[10px] font-bold uppercase bg-slate-100 px-2 py-0.5 rounded-full">
-                      {p.status?.replace(/_/g, ' ')}
+                      {labelFor(t, 'status_', p.status)}
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 mt-1">
-                    {p.origin_branch_code} → {p.destination_branch_code} · {p.payment_status}
+                    {p.origin_branch_code} → {p.destination_branch_code} · {labelFor(t, 'payment_', p.payment_status)}
                   </p>
                 </button>
               ))
@@ -281,15 +281,15 @@ export default function TelegramMiniApp() {
                 <div className="flex justify-between items-start">
                   <h3 className="font-mono font-black text-lg text-blue-600">{trackingResult.tracking_code}</h3>
                   <span className="text-[11px] font-bold uppercase bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                    {trackingResult.status?.replace(/_/g, ' ')}
+                    {labelFor(t, 'status_', trackingResult.status)}
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-3 rounded-2xl">
                   <div><span className="text-slate-400 block">{t('route')}</span>{trackingResult.origin_branch_name} → {trackingResult.destination_branch_name}</div>
-                  <div><span className="text-slate-400 block">{t('payment')}</span>{trackingResult.payment_status}</div>
+                  <div><span className="text-slate-400 block">{t('payment')}</span>{labelFor(t, 'payment_', trackingResult.payment_status)}</div>
                 </div>
                 {trackingResult.eta && (
-                  <p className="text-xs text-slate-600">ETA: {trackingResult.eta.remaining_minutes} min</p>
+                  <p className="text-xs text-slate-600">{t('eta_minutes', { count: trackingResult.eta.remaining_minutes, minutesShort: t('minutes_short') })}</p>
                 )}
                 {trackingResult.flight?.flight_number && (
                   <p className="text-xs">✈️ {trackingResult.flight.flight_number} ({trackingResult.flight.status})</p>
@@ -313,7 +313,7 @@ export default function TelegramMiniApp() {
                   <div className="space-y-2 border-l-2 border-blue-200 pl-3">
                     {(trackingResult.journey_events || trackingResult.status_history || []).slice(0, 8).map((step: any, idx: number) => (
                       <div key={idx} className="text-xs">
-                        <p className="font-bold capitalize">{(step.to_status || step.event_type || '').replace(/_/g, ' ')}</p>
+                        <p className="font-bold capitalize">{labelFor(t, 'status_', step.to_status || step.event_type)}</p>
                         <p className="text-slate-400">{new Date(step.created_at || step.timestamp).toLocaleString()}</p>
                       </div>
                     ))}
