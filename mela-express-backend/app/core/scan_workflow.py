@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 
+from app.core.brand import brand_short
 from app.core.state_machine import allowed_next
 from app.models import Branch, FacilityType, Parcel, ParcelStatus, StaffRole
 
@@ -162,7 +163,7 @@ def normalize_scan_code(raw: str) -> str:
     if "/TRACK/" in text:
         text = text.split("/TRACK/")[-1].split("?")[0].split("#")[0]
     # Some scanners prefix with ]C1 etc.
-    for prefix in ("]C1", "]E0", "MELA:"):
-        if text.startswith(prefix):
+    for prefix in ("]C1", "]E0", "MELA:", f"{brand_short().upper()}:" if brand_short() else ""):
+        if prefix and text.startswith(prefix):
             text = text[len(prefix):]
     return text.strip("- ").split()[0][:30]

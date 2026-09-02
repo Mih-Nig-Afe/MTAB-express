@@ -3,7 +3,7 @@ import logging
 from telegram import BotCommand, MenuButtonWebApp, WebAppInfo
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, CallbackQueryHandler
 from app.config import settings
-from app.core.brand import tracking_example
+from app.core.brand import brand_name, brand_short, set_runtime_bot_username, tracking_example, tracking_prefix
 
 from app.bot.handlers.start import start, handle_contact
 from app.bot.handlers.track import track
@@ -24,7 +24,27 @@ def build_app():
         sys.exit(0)
 
     async def post_init(application):
-        # Slash-command hints in the chat menu.
+        try:
+            me = await application.bot.get_me()
+            if me.username:
+                set_runtime_bot_username(me.username)
+                logger.info("Telegram bot identity: @%s", me.username)
+        except Exception as e:
+            logger.warning("Could not fetch Telegram bot identity: %s", e)
+
+        name = brand_name()
+        prefix = tracking_prefix()
+        if name:
+            try:
+                await application.bot.set_my_name(name)
+                await application.bot.set_my_short_description(f"{name} parcel tracking")
+                await application.bot.set_my_description(
+                    f"{name} — track parcels, pay delivery fees, and collect with a pickup code. "
+                    f"Paste a {prefix} tracking code anytime."
+                )
+            except Exception as e:
+                logger.warning("Could not set Telegram bot profile name: %s", e)
+
         await application.bot.set_my_commands([
             BotCommand("start", "Welcome & link your phone"),
             BotCommand("track", f"Track a parcel, e.g. /track {tracking_example()}"),
@@ -32,15 +52,13 @@ def build_app():
             BotCommand("help", "Commands & tips"),
             BotCommand("lang", "Switch language (en / am)"),
         ])
-        # The ≡ menu button launches the Mini App directly — but Telegram only
-        # accepts https web-app URLs there. Locally (http portal) we skip it;
-        # in production this gives every user a one-tap entry point.
         portal = settings.public_portal_url.rstrip("/")
+        menu_label = f"🚀 {brand_short() or name or 'Open App'}"
         if portal.startswith("https://"):
             try:
                 await application.bot.set_chat_menu_button(
                     menu_button=MenuButtonWebApp(
-                        text="🚀 Open App",
+                        text=menu_label[:14],  # Telegram menu-button text is short
                         web_app=WebAppInfo(url=f"{portal}/mini-app"),
                     )
                 )

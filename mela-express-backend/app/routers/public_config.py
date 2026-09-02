@@ -1,7 +1,7 @@
 """Public, unauthenticated config — brand identity for all clients."""
 from fastapi import APIRouter
 
-from app.core.brand import brand_name, brand_short, sms_sender_id, tracking_example, tracking_prefix
+from app.core.brand import brand_name, brand_short, sms_sender_id, telegram_bot_url, telegram_bot_username, tracking_example, tracking_prefix
 
 router = APIRouter(prefix="/public", tags=["public"])
 
@@ -17,4 +17,6 @@ async def get_public_brand():
         "tracking_example": tracking_example(),
         "tracking_placeholder": f"{prefix}-HW-000000" if prefix else "",
         "sms_sender_id": sms_sender_id(),
+        "telegram_bot_username": telegram_bot_username(),
+        "telegram_bot_url": telegram_bot_url(),
     }

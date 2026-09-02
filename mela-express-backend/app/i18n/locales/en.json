@@ -57,6 +57,7 @@
   "bot.welcome": "👋 Welcome to {brand_name}!\n\nI can help you track your parcels and manage your deliveries.\nTo get started, please share your phone number so we can link your account.",
   "bot.link_prompt": "Please use /start and share your contact to link your account first.",
   "bot.link_success": "✅ *Account Successfully Linked!*\nPhone: `{phone}`\n\nYou will now receive automatic real-time push notifications whenever your shipments move across hubs.",
+  "bot.mini_app_open": "🚀 Open {brand_name} Mini App",
   "bot.mini_app_teaser": "✨ Or launch our interactive web app directly inside Telegram:",
   "bot.track_usage": "Usage: /track {tracking_example}",
   "bot.parcel_not_found": "❌ No parcel found with code {code}.",

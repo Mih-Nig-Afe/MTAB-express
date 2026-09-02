@@ -9,17 +9,25 @@ from app.bot.webapp import mini_app_button, compact_rows
 from app.bot.api_client import api_base_url
 from app.bot.helpers import resolve_lang, fetch_customer_by_telegram
 from app.core.phones import normalize_phone
+from app.core.brand import telegram_support_url
+
 
 async def _main_menu(lang: str) -> InlineKeyboardMarkup:
+    support = telegram_support_url()
+    support_row = []
+    if support:
+        support_row.append(
+            InlineKeyboardButton("📞 Customer Support" if lang == "en" else "📞 ድጋፍ", url=support)
+        )
     inline_keyboard = compact_rows([
-        [mini_app_button("🚀 Open Mela Mini App" if lang == "en" else "🚀 ሜላ መተግበሪያ")],
+        [mini_app_button(msg(lang, "bot.mini_app_open"))],
         [
             InlineKeyboardButton("🔍 Track Parcel" if lang == "en" else "🔍 እቃ መከታተል", callback_data="cmd_track"),
             InlineKeyboardButton("📦 My Orders" if lang == "en" else "📦 የእኔ ትዕዛዞች", callback_data="cmd_my_parcels"),
         ],
         [
             InlineKeyboardButton("🏢 Branch Hubs" if lang == "en" else "🏢 ቅርንጫፎች", callback_data="cmd_branches"),
-            InlineKeyboardButton("📞 Customer Support" if lang == "en" else "📞 ድጋፍ", url="https://t.me/mela_support"),
+            *support_row,
         ],
     ])
     return InlineKeyboardMarkup(inline_keyboard) if inline_keyboard else InlineKeyboardMarkup([])

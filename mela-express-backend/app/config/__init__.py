@@ -6,6 +6,8 @@ class Settings(BaseSettings):
 
     # Telegram
     telegram_bot_token: str = ""
+    telegram_bot_username: str = ""  # without @ — used for t.me links; also filled from getMe
+    telegram_support_url: str = ""   # optional support chat URL
 
     # Chapa
     chapa_secret_key: str = ""

@@ -51,3 +51,24 @@ def sms_sender_id() -> str:
         return settings.sms_sender_id
     short = brand_short()
     return f"{short}Express" if short else ""
+
+
+_runtime_bot_username = ""
+
+
+def set_runtime_bot_username(username: str) -> None:
+    global _runtime_bot_username
+    _runtime_bot_username = (username or "").lstrip("@").strip()
+
+
+def telegram_bot_username() -> str:
+    return (settings.telegram_bot_username or _runtime_bot_username).lstrip("@").strip()
+
+
+def telegram_bot_url() -> str:
+    user = telegram_bot_username()
+    return f"https://t.me/{user}" if user else ""
+
+
+def telegram_support_url() -> str:
+    return (settings.telegram_support_url or telegram_bot_url()).strip()

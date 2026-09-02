@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { Parcel } from '@/types';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import { api } from '@/lib/api';
+import { useBrand } from '@/components/BrandProvider';
+import { displayName } from '@brand';
 
 interface WaybillProps {
   parcel: Parcel;
@@ -12,6 +14,7 @@ interface WaybillProps {
 }
 
 export default function WaybillLabel({ parcel, originName, destName, onClose }: WaybillProps) {
+  const brand = useBrand();
   const [barcodeUrl, setBarcodeUrl] = useState('');
   const [qrUrl, setQrUrl] = useState('');
 
@@ -71,7 +74,7 @@ export default function WaybillLabel({ parcel, originName, destName, onClose }: 
         <div className="border-4 border-black p-5 rounded-xl bg-white text-black font-sans print:border-4 print:w-[380px] mx-auto print:rounded-none">
           <div className="flex justify-between items-center border-b-2 border-black pb-3">
             <div>
-              <h1 className="text-2xl font-black tracking-tighter">MELA EXPRESS</h1>
+              <h1 className="text-2xl font-black tracking-tighter">{displayName(brand)}</h1>
               <p className="text-[10px] font-bold tracking-wider uppercase text-gray-600">Scan at every checkpoint</p>
             </div>
             <div className="text-right">

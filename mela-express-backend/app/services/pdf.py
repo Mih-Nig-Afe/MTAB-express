@@ -1,6 +1,8 @@
 import jinja2
 from weasyprint import HTML
 
+from app.core.brand import brand_name
+
 WAYBILL_TEMPLATE = """
 <!DOCTYPE html>
 <html>
@@ -19,7 +21,7 @@ WAYBILL_TEMPLATE = """
 <body>
     <div class="container">
         <div class="header">
-            <h1>MELA EXPRESS</h1>
+            <h1>{{ brand_name }}</h1>
             <h2>Waybill Label</h2>
         </div>
         
@@ -61,7 +63,7 @@ WAYBILL_TEMPLATE = """
 def render_waybill_html(parcel_data: dict) -> str:
     """Renders the waybill HTML template with parcel data."""
     template = jinja2.Template(WAYBILL_TEMPLATE)
-    return template.render(**parcel_data)
+    return template.render(brand_name=brand_name(), **parcel_data)
 
 def generate_pdf_bytes(html: str) -> bytes:
     """Generates PDF bytes from an HTML string using WeasyPrint."""

@@ -1,6 +1,8 @@
 'use client';
 
 import { useTranslation, LanguageToggle } from '@/lib/i18n';
+import { useBrand } from '@/components/BrandProvider';
+import { displayName } from '@brand';
 import React, { useState, useEffect, useCallback } from 'react';
 import Script from 'next/script';
 import {
@@ -26,6 +28,9 @@ interface BranchInfo {
 
 export default function TelegramMiniApp() {
   const { t } = useTranslation();
+  const brand = useBrand();
+  const company = displayName(brand);
+  const initial = (brand.brandShort || company).slice(0, 1).toUpperCase() || '•';
   const [activeTab, setActiveTab] = useState<Tab>('orders');
   const [authReady, setAuthReady] = useState(false);
   const [authError, setAuthError] = useState('');
@@ -189,9 +194,9 @@ export default function TelegramMiniApp() {
       <header className="bg-blue-600 text-white p-4 shadow-md sticky top-0 z-30">
         <div className="max-w-md mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center font-black">M</div>
+            <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center font-black">{initial}</div>
             <div>
-              <h1 className="font-extrabold text-sm tracking-tight leading-none">MELA EXPRESS</h1>
+              <h1 className="font-extrabold text-sm tracking-tight leading-none uppercase">{company}</h1>
               <p className="text-[10px] text-blue-100 mt-0.5">Telegram Mini App</p>
             </div>
           </div>

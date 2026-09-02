@@ -11,6 +11,7 @@ from app.dependencies import get_current_user, require_roles, CurrentUser
 from app.exceptions import NotFoundError, ForbiddenError
 from app.services import chapa
 from app.config import settings
+from app.core.brand import telegram_bot_url
 from app.services.notifications import notify_payment_confirmed
 
 router = APIRouter(prefix="/api/payments", tags=["payments"])
@@ -106,9 +107,9 @@ async def initiate_chapa_payment(request: ChapaInitRequest, db: AsyncSession = D
     checkout_url = await chapa.initiate_checkout(
         amount=float(parcel.price),
         tx_ref=tx_ref,
-        customer_email=request.customer_email or f"{sender.phone if sender else 'customer'}@mela-express.placeholder",
+        customer_email=request.customer_email or f"{sender.phone if sender else 'customer'}@customer.local",
         customer_phone=sender.phone if sender else "+251900000000",
-        return_url="https://t.me/YourMelaExpressBot"
+        return_url=telegram_bot_url() or settings.public_portal_url,
     )
 
     return {"checkout_url": checkout_url, "tx_ref": tx_ref}
