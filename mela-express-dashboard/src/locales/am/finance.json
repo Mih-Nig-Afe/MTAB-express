@@ -1,0 +1,19 @@
+{
+  "amount_due": "የሚገባ ክፍያ",
+  "amount_label": "መጠን",
+  "avg_delivery_days": "አማካይ የመድረስ ቀናት",
+  "balanced": "ሚዛማዊ",
+  "branch_breakdown": "የቅርንጫፍ ትንተና",
+  "branch_name": "ቅርንጫፍ",
+  "cash": "የጥሬ ገንዘብ ሂሳብ",
+  "collected_cash_msg": "የጥሬ ገንዘብ ክፍያ በተሳካ ሁኔታ ተመዝግቧል።",
+  "collected_cash_title": "ጥሬ ገንዘብ ተቀብለናል",
+  "drawer_status": "የሳጥን ሁኔታ",
+  "end_date": "መጨረሻ ቀን",
+  "failed_record_cash": "የጥሬ ገንዘብ ክፍያ መመዝገብ አልተቻለም።",
+  "network_performance": "የአውታረ መረብ አፈጻጸም",
+  "start_date": "መጀመሪያ ቀን",
+  "total_collected": "ጠቅላላ የተሰበሰበ ጥሬ ገንዘብ",
+  "total_revenue": "ጠቅላላ ገቢ",
+  "transactions": "ግብይቶች"
+}
