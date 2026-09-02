@@ -5,8 +5,16 @@
 CREATE TYPE parcel_status_enum AS ENUM (
     'created',
     'received_at_origin',
+    'processed_at_origin',
+    'dispatched_from_origin',
     'in_transit',
+    'arrived_origin_airport',
+    'checked_in_flight',
+    'departed',
+    'arrived_destination_airport',
+    'released_from_airport',
     'arrived_at_destination',
+    'distributed_to_branch',
     'ready_for_pickup',
     'delivered',
     'returned',
@@ -20,4 +28,6 @@ CREATE TYPE payment_method_enum AS ENUM ('cash', 'chapa');
 CREATE TYPE payment_status_enum AS ENUM ('pending', 'paid', 'failed');
 CREATE TYPE staff_role_enum AS ENUM ('operator', 'manager', 'driver', 'admin');
 CREATE TYPE size_category_enum AS ENUM ('small', 'medium', 'large', 'oversized');
-CREATE TYPE manifest_status_enum AS ENUM ('open', 'dispatched', 'received');
+CREATE TYPE content_category_enum AS ENUM ('documents', 'electronics', 'clothing', 'food', 'fragile', 'general');
+CREATE TYPE facility_type_enum AS ENUM ('branch', 'airport', 'sorting_hub');
+CREATE TYPE manifest_status_enum AS ENUM ('draft', 'in_transit', 'received', 'cancelled');
