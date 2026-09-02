@@ -27,10 +27,25 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
-api.interceptors.response.use(
+  api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+
+    // Never hijack auth-endpoint failures: a wrong password on the login page
+    // must surface as an inline form error, not trigger logout + full reload.
+    const url = originalRequest?.url || '';
+    if (error.response?.status === 401 && url.includes('/auth/login')) {
+      return Promise.reject(error);
+    }
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      typeof window !== 'undefined' &&
+      window.location.pathname === '/login'
+    ) {
+      return Promise.reject(error);
+    }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {

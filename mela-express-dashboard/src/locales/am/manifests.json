@@ -1,0 +1,18 @@
+{
+  "checkpoints": "የመንገድ ምልክቶች",
+  "create_manifest": "ማኒፌስት ፍጠር",
+  "driver_name": "የሹፋን ስም",
+  "location_name": "የቦታ ስም",
+  "manifest_no": "የማኒፌስት #",
+  "manifest_received": "ማኒፌስቱ በተሳካ ሁኔታ ተቀብለናል",
+  "manifests": "ማኒፌስቶች",
+  "mark_verified": "የተረጋገጠ አድርግ",
+  "no_parcels_for_route": "በዚህ መነሻ ቅርንጫፍ የሚላኩ እቃዎች የሉም።",
+  "notes": "ማስታወሻዎች",
+  "parcels_count": "እቃዎች",
+  "receive": "ተቀበል",
+  "receive_submit": "የተፈተሹ እቃዎች መቀበል አረጋግጥ",
+  "receive_warning": "ያልተፈተሹ እቃዎች «ቆም ብሏል» ይባላሉ።",
+  "select_parcels_hint": "ከመነሻ ቅርንጫፍ ለመላክ ዝግጁ የሆኑ እቃዎች",
+  "vehicle_plate": "የተሽከርካሪ ቁጥር"
+}
