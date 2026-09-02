@@ -1,0 +1,23 @@
+{
+  "status_created": "Created",
+  "status_received_at_origin": "Received at Origin",
+  "status_in_transit": "In Transit",
+  "status_processed_at_origin": "Processed at Origin",
+  "status_dispatched_from_origin": "Dispatched from Origin",
+  "status_arrived_origin_airport": "At Origin Airport",
+  "status_checked_in_flight": "Checked In for Flight",
+  "status_departed": "In Flight",
+  "status_arrived_destination_airport": "Landed",
+  "status_released_from_airport": "Released from Airport",
+  "status_distributed_to_branch": "At Destination Branch",
+  "status_arrived_at_destination": "Arrived at Destination",
+  "status_ready_for_pickup": "Ready for Pickup",
+  "status_delivered": "Delivered",
+  "status_returned": "Returned",
+  "status_cancelled": "Cancelled",
+  "status_lost": "Lost",
+  "status_on_hold": "On Hold",
+  "payment_pending": "Pending",
+  "payment_paid": "Paid",
+  "payment_failed": "Failed"
+}
