@@ -10,15 +10,7 @@ from app.dependencies import get_current_user
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
-def _normalize_phone(phone: str) -> str:
-    cleaned = phone.strip().replace(" ", "").replace("-", "")
-    if cleaned.startswith("0"):
-        return "+251" + cleaned[1:]
-    elif cleaned.startswith("251"):
-        return "+" + cleaned
-    elif not cleaned.startswith("+"):
-        return "+251" + cleaned
-    return cleaned
+from app.core.phones import normalize_phone as _normalize_phone
 
 @router.post("/login", response_model=TokenResponse)
 async def login(request: LoginRequest, db: AsyncSession = Depends(get_db)):
