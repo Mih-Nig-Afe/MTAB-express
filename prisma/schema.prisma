@@ -1,0 +1,355 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model alembic_version {
+  version_num String @id(map: "alembic_version_pkc") @db.VarChar(32)
+}
+
+model branches {
+  id                                                                    String                  @id @db.Uuid
+  name                                                                  String                  @db.VarChar(120)
+  code                                                                  String                  @unique @db.VarChar(10)
+  city                                                                  String                  @db.VarChar(120)
+  address                                                               String?
+  phone                                                                 String                  @db.VarChar(30)
+  email                                                                 String?                 @db.VarChar(120)
+  is_active                                                             Boolean                 @default(true)
+  airport_iata                                                          String?                 @db.VarChar(4)
+  latitude                                                              Decimal?                @db.Decimal(9, 6)
+  longitude                                                             Decimal?                @db.Decimal(9, 6)
+  facility_type                                                         facility_type_enum      @default(branch)
+  parcel_status_history                                                 parcel_status_history[]
+  parcels_parcels_destination_branch_idTobranches                       parcels[]               @relation("parcels_destination_branch_idTobranches")
+  parcels_parcels_origin_branch_idTobranches                            parcels[]               @relation("parcels_origin_branch_idTobranches")
+  staff_users                                                           staff_users[]
+  transfer_manifests_transfer_manifests_destination_branch_idTobranches transfer_manifests[]    @relation("transfer_manifests_destination_branch_idTobranches")
+  transfer_manifests_transfer_manifests_origin_branch_idTobranches      transfer_manifests[]    @relation("transfer_manifests_origin_branch_idTobranches")
+}
+
+model customers {
+  id                                     String              @id @db.Uuid
+  phone                                  String              @unique(map: "ix_customers_phone") @db.VarChar(30)
+  telegram_id                            String?             @unique(map: "ix_customers_telegram_id") @db.VarChar(40)
+  name                                   String?             @db.VarChar(120)
+  language                               String?             @default("en") @db.VarChar(5)
+  notification_logs                      notification_logs[]
+  parcels_parcels_receiver_idTocustomers parcels[]           @relation("parcels_receiver_idTocustomers")
+  parcels_parcels_sender_idTocustomers   parcels[]           @relation("parcels_sender_idTocustomers")
+}
+
+model manifest_checkpoints {
+  id                 String             @id @db.Uuid
+  manifest_id        String             @db.Uuid
+  location_name      String             @db.VarChar(120)
+  latitude           Decimal?           @db.Decimal(9, 6)
+  longitude          Decimal?           @db.Decimal(9, 6)
+  note               String?
+  created_by         String?            @db.Uuid
+  created_at         DateTime           @default(now()) @db.Timestamptz(6)
+  staff_users        staff_users?       @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  transfer_manifests transfer_manifests @relation(fields: [manifest_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model manifest_parcels {
+  id                 String             @id @db.Uuid
+  manifest_id        String             @db.Uuid
+  parcel_id          String             @db.Uuid
+  received           Boolean            @default(false)
+  received_at        DateTime?          @db.Timestamptz(6)
+  received_by        String?            @db.Uuid
+  transfer_manifests transfer_manifests @relation(fields: [manifest_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  parcels            parcels            @relation(fields: [parcel_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  staff_users        staff_users?       @relation(fields: [received_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model notification_logs {
+  id           String     @id @db.Uuid
+  parcel_id    String?    @db.Uuid
+  customer_id  String?    @db.Uuid
+  channel      String     @db.VarChar(20)
+  message      String
+  status       String     @db.VarChar(20)
+  error_detail String?
+  created_at   DateTime   @default(now()) @db.Timestamptz(6)
+  customers    customers? @relation(fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  parcels      parcels?   @relation(fields: [parcel_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model parcel_flight_legs {
+  id                  String    @id @db.Uuid
+  parcel_id           String    @db.Uuid
+  flight_number       String    @db.VarChar(12)
+  airline_iata        String?   @db.VarChar(4)
+  airline_name        String?   @db.VarChar(80)
+  origin_iata         String?   @db.VarChar(4)
+  dest_iata           String?   @db.VarChar(4)
+  airway_bill         String?   @db.VarChar(32)
+  status              String    @default("scheduled") @db.VarChar(20)
+  scheduled_departure DateTime? @db.Timestamptz(6)
+  scheduled_arrival   DateTime? @db.Timestamptz(6)
+  actual_departure    DateTime? @db.Timestamptz(6)
+  actual_arrival      DateTime? @db.Timestamptz(6)
+  delay_minutes       Int       @default(0)
+  latitude            Decimal?  @db.Decimal(9, 6)
+  longitude           Decimal?  @db.Decimal(9, 6)
+  altitude_m          Decimal?  @db.Decimal(8, 1)
+  heading             Decimal?  @db.Decimal(6, 1)
+  velocity_ms         Decimal?  @db.Decimal(8, 2)
+  on_ground           Boolean?
+  last_position_at    DateTime? @db.Timestamptz(6)
+  last_polled_at      DateTime? @db.Timestamptz(6)
+  provider            String?   @db.VarChar(40)
+  raw                 Json?
+  created_at          DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime  @default(now()) @db.Timestamptz(6)
+  parcels             parcels   @relation(fields: [parcel_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([flight_number], map: "ix_parcel_flight_legs_flight_number")
+  @@index([parcel_id], map: "ix_parcel_flight_legs_parcel_id")
+}
+
+model parcel_journey_events {
+  id             String              @id @db.Uuid
+  parcel_id      String              @db.Uuid
+  event_type     String              @db.VarChar(40)
+  to_status      parcel_status_enum?
+  location_name  String?             @db.VarChar(160)
+  facility_type  String?             @db.VarChar(40)
+  latitude       Decimal?            @db.Decimal(9, 6)
+  longitude      Decimal?            @db.Decimal(9, 6)
+  flight_number  String?             @db.VarChar(12)
+  note           String?
+  source         String              @default("staff") @db.VarChar(20)
+  actor_staff_id String?             @db.Uuid
+  extra          Json?
+  created_at     DateTime            @default(now()) @db.Timestamptz(6)
+  staff_users    staff_users?        @relation(fields: [actor_staff_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  parcels        parcels             @relation(fields: [parcel_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([parcel_id], map: "ix_parcel_journey_events_parcel_id")
+}
+
+model parcel_proof_of_delivery {
+  id            String      @id @db.Uuid
+  parcel_id     String      @db.Uuid
+  photo_url     String      @db.VarChar(500)
+  signature_url String?     @db.VarChar(500)
+  notes         String?
+  created_by    String      @db.Uuid
+  created_at    DateTime    @default(now()) @db.Timestamptz(6)
+  staff_users   staff_users @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  parcels       parcels     @relation(fields: [parcel_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model parcel_status_history {
+  id          String              @id @db.Uuid
+  parcel_id   String              @db.Uuid
+  from_status parcel_status_enum?
+  to_status   parcel_status_enum
+  changed_by  String?             @db.Uuid
+  branch_id   String?             @db.Uuid
+  note        String?
+  timestamp   DateTime            @default(now()) @db.Timestamptz(6)
+  branches    branches?           @relation(fields: [branch_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  staff_users staff_users?        @relation(fields: [changed_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  parcels     parcels             @relation(fields: [parcel_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model parcels {
+  id                                               String                     @id @db.Uuid
+  tracking_code                                    String                     @unique(map: "ix_parcels_tracking_code") @db.VarChar(30)
+  origin_branch_id                                 String                     @db.Uuid
+  destination_branch_id                            String                     @db.Uuid
+  sender_id                                        String                     @db.Uuid
+  receiver_name                                    String                     @db.VarChar(120)
+  receiver_phone                                   String                     @db.VarChar(30)
+  receiver_id                                      String?                    @db.Uuid
+  description                                      String?
+  weight_kg                                        Decimal?                   @db.Decimal(6, 2)
+  declared_value                                   Decimal?                   @db.Decimal(10, 2)
+  price                                            Decimal                    @db.Decimal(10, 2)
+  payment_mode                                     payment_mode_enum
+  payment_method                                   payment_method_enum?
+  payment_status                                   payment_status_enum
+  status                                           parcel_status_enum
+  waybill_url                                      String?                    @db.VarChar(500)
+  created_by                                       String                     @db.Uuid
+  created_at                                       DateTime                   @default(now()) @db.Timestamptz(6)
+  updated_at                                       DateTime                   @default(now()) @db.Timestamptz(6)
+  pickup_otp                                       String?                    @db.VarChar(10)
+  otp_expires_at                                   DateTime?                  @db.Timestamptz(6)
+  origin_airport_iata                              String?                    @db.VarChar(4)
+  dest_airport_iata                                String?                    @db.VarChar(4)
+  promised_delivery_at                             DateTime?                  @db.Timestamptz(6)
+  current_eta_at                                   DateTime?                  @db.Timestamptz(6)
+  pickup_ready_at                                  DateTime?                  @db.Timestamptz(6)
+  pickup_reminders_sent                            Int                        @default(0)
+  last_pickup_reminder_at                          DateTime?                  @db.Timestamptz(6)
+  size_category                                    size_category_enum?
+  content_category                                 content_category_enum?     @default(general)
+  length_cm                                        Decimal?                   @db.Decimal(6, 1)
+  width_cm                                         Decimal?                   @db.Decimal(6, 1)
+  height_cm                                        Decimal?                   @db.Decimal(6, 1)
+  volumetric_weight_kg                             Decimal?                   @db.Decimal(6, 2)
+  chargeable_weight_kg                             Decimal?                   @db.Decimal(6, 2)
+  manifest_parcels                                 manifest_parcels[]
+  notification_logs                                notification_logs[]
+  parcel_flight_legs                               parcel_flight_legs[]
+  parcel_journey_events                            parcel_journey_events[]
+  parcel_proof_of_delivery                         parcel_proof_of_delivery[]
+  parcel_status_history                            parcel_status_history[]
+  staff_users                                      staff_users                @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  branches_parcels_destination_branch_idTobranches branches                   @relation("parcels_destination_branch_idTobranches", fields: [destination_branch_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  branches_parcels_origin_branch_idTobranches      branches                   @relation("parcels_origin_branch_idTobranches", fields: [origin_branch_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customers_parcels_receiver_idTocustomers         customers?                 @relation("parcels_receiver_idTocustomers", fields: [receiver_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customers_parcels_sender_idTocustomers           customers                  @relation("parcels_sender_idTocustomers", fields: [sender_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  payments                                         payments[]
+  pickup_reminder_logs                             pickup_reminder_logs[]
+}
+
+model payments {
+  id              String              @id @db.Uuid
+  parcel_id       String              @db.Uuid
+  amount          Decimal             @db.Decimal(10, 2)
+  method          payment_method_enum
+  chapa_tx_ref    String?             @unique(map: "ix_payments_chapa_tx_ref") @db.VarChar(100)
+  status          payment_status_enum
+  collected_by    String?             @db.Uuid
+  verified_at     DateTime?           @db.Timestamptz(6)
+  created_at      DateTime            @default(now()) @db.Timestamptz(6)
+  override_reason String?
+  staff_users     staff_users?        @relation(fields: [collected_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  parcels         parcels             @relation(fields: [parcel_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model pickup_reminder_logs {
+  id             String   @id @db.Uuid
+  parcel_id      String   @db.Uuid
+  day_number     Int
+  recipient_role String   @db.VarChar(20)
+  channel        String   @db.VarChar(20)
+  status         String   @default("sent") @db.VarChar(20)
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+  parcels        parcels  @relation(fields: [parcel_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([parcel_id], map: "ix_pickup_reminder_logs_parcel_id")
+}
+
+model staff_users {
+  id                       String                     @id @db.Uuid
+  name                     String                     @db.VarChar(120)
+  phone                    String                     @unique @db.VarChar(30)
+  email                    String?                    @unique @db.VarChar(120)
+  password_hash            String                     @db.VarChar(255)
+  role                     staff_role_enum
+  branch_id                String?                    @db.Uuid
+  is_active                Boolean                    @default(true)
+  manifest_checkpoints     manifest_checkpoints[]
+  manifest_parcels         manifest_parcels[]
+  parcel_journey_events    parcel_journey_events[]
+  parcel_proof_of_delivery parcel_proof_of_delivery[]
+  parcel_status_history    parcel_status_history[]
+  parcels                  parcels[]
+  payments                 payments[]
+  branches                 branches?                  @relation(fields: [branch_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  transfer_manifests       transfer_manifests[]
+}
+
+model transfer_manifests {
+  id                                                          String                 @id @db.Uuid
+  origin_branch_id                                            String                 @db.Uuid
+  destination_branch_id                                       String                 @db.Uuid
+  created_by                                                  String                 @db.Uuid
+  driver_name                                                 String?                @db.VarChar(120)
+  vehicle_plate                                               String?                @db.VarChar(20)
+  status                                                      manifest_status_enum
+  notes                                                       String?
+  created_at                                                  DateTime               @default(now()) @db.Timestamptz(6)
+  updated_at                                                  DateTime               @default(now()) @db.Timestamptz(6)
+  manifest_checkpoints                                        manifest_checkpoints[]
+  manifest_parcels                                            manifest_parcels[]
+  staff_users                                                 staff_users            @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  branches_transfer_manifests_destination_branch_idTobranches branches               @relation("transfer_manifests_destination_branch_idTobranches", fields: [destination_branch_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  branches_transfer_manifests_origin_branch_idTobranches      branches               @relation("transfer_manifests_origin_branch_idTobranches", fields: [origin_branch_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+enum content_category_enum {
+  documents
+  electronics
+  clothing
+  food
+  fragile
+  general
+}
+
+enum facility_type_enum {
+  branch
+  airport
+  sorting_hub
+}
+
+enum manifest_status_enum {
+  open
+  dispatched
+  received
+  draft
+  in_transit
+  cancelled
+}
+
+enum parcel_status_enum {
+  created
+  received_at_origin
+  in_transit
+  arrived_at_destination
+  ready_for_pickup
+  delivered
+  returned
+  cancelled
+  lost
+  on_hold
+  processed_at_origin
+  dispatched_from_origin
+  arrived_origin_airport
+  checked_in_flight
+  departed
+  arrived_destination_airport
+  released_from_airport
+  distributed_to_branch
+}
+
+enum payment_method_enum {
+  cash
+  chapa
+}
+
+enum payment_mode_enum {
+  before
+  after
+}
+
+enum payment_status_enum {
+  pending
+  paid
+  failed
+}
+
+enum size_category_enum {
+  small
+  medium
+  large
+  oversized
+}
+
+enum staff_role_enum {
+  operator
+  manager
+  driver
+  admin
+}
