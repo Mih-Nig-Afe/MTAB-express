@@ -1,8 +1,17 @@
+'use client';
 import { ParcelStatusHistory, ParcelStatus } from '@/types';
 import { formatDate, formatStatus, statusColor } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
 
 export default function StatusTimeline({ history }: { history: ParcelStatusHistory[] }) {
-  if (!history || history.length === 0) return <div className="text-sm text-gray-500">No status history available.</div>;
+  const { t } = useTranslation();
+  if (!history || history.length === 0) return <div className="text-sm text-gray-500">{t('no_status_history')}</div>;
+
+  const statusLabel = (status: ParcelStatus) => {
+    const key = `status_${status}`;
+    const label = t(key);
+    return label === key ? formatStatus(status) : label;
+  };
 
   return (
     <div className="flow-root">
@@ -24,7 +33,7 @@ export default function StatusTimeline({ history }: { history: ParcelStatusHisto
                   </div>
                   <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
                     <div>
-                      <p className="text-sm text-gray-900 font-medium">{formatStatus(currentStatus)}</p>
+                      <p className="text-sm text-gray-900 font-medium">{statusLabel(currentStatus)}</p>
                       {event.note && <p className="mt-1 text-sm text-gray-500">{event.note}</p>}
                     </div>
                     <div className="text-right text-sm whitespace-nowrap text-gray-500">
