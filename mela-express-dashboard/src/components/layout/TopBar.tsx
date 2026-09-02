@@ -3,11 +3,15 @@ import { useAuth, logout } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
+import { useBrand } from '@/components/BrandProvider';
+import { displayName } from '@brand';
 
 export default function TopBar() {
   const { user, setUser } = useAuth();
   const router = useRouter();
   const { t } = useTranslation();
+  const brand = useBrand();
+  const company = displayName(brand);
 
   const handleLogout = () => {
     logout();
@@ -20,7 +24,13 @@ export default function TopBar() {
       <div className="flex items-center gap-4 ml-12 md:ml-0">
         <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
           <span className="text-xl">🏢</span>
-          <span>{user?.branch_id ? t('branch_hub') : t('headquarters_admin')}</span>
+          <span>
+            {user?.branch_id
+              ? t('branch_hub')
+              : company
+                ? `${company} HQ`
+                : t('headquarters_admin')}
+          </span>
         </h2>
       </div>
 

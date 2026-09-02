@@ -4,28 +4,36 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import {
   applyBrandToI18n,
   envBrand,
-  getBrand,
   loadBrandFromApi,
   type BrandConfig,
 } from '@/lib/brand';
-import { displayName } from '@brand';
+import { brandFromEnv, displayName } from '@brand';
 
-const BrandContext = createContext<BrandConfig>(getBrand());
+function initialBrand(): BrandConfig {
+  return displayName(envBrand) ? envBrand : brandFromEnv({});
+}
+
+const BrandContext = createContext<BrandConfig>(initialBrand());
 
 export function BrandProvider({ children }: { children: ReactNode }) {
-  const [brand, setBrand] = useState<BrandConfig>(getBrand());
+  const [brand, setBrand] = useState<BrandConfig>(initialBrand());
 
   useEffect(() => {
-    if (displayName(envBrand)) {
-      applyBrandToI18n(envBrand);
-      setBrand(envBrand);
+    const apply = (next: BrandConfig) => {
+      applyBrandToI18n(next);
+      setBrand(next);
+    };
+
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (apiUrl) {
+      loadBrandFromApi(apiUrl)
+        .then(apply)
+        .catch(() => {
+          if (displayName(envBrand)) apply(envBrand);
+        });
       return;
     }
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (!apiUrl) return;
-    loadBrandFromApi(apiUrl)
-      .then(setBrand)
-      .catch(() => {});
+    if (displayName(envBrand)) apply(envBrand);
   }, []);
 
   return <BrandContext.Provider value={brand}>{children}</BrandContext.Provider>;

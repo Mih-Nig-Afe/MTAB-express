@@ -6,7 +6,7 @@
   "cash_short": "ጥሬ ገንዘብ",
   "create_manifest": "ማኒፌስት ፍጠር",
   "dashboard": "ዳሽቦርድ",
-  "headquarters_admin": "ማዕከላዊ መስሪያ ቤት",
+  "headquarters_admin": "{{brandName}} HQ",
   "logout": "ውጣ",
   "manifests": "ማኒፌስቶች",
   "new_parcel": "+ አዲስ እቃ",
