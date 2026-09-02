@@ -2,12 +2,14 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { isAuthenticated, useAuth } from '@/lib/auth';
+import { useTranslation } from '@/lib/i18n';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 
 export default function RoleGuard({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) {
   const router = useRouter();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -31,9 +33,9 @@ export default function RoleGuard({ children, allowedRoles }: { children: React.
     return (
       <div suppressHydrationWarning className="flex h-screen items-center justify-center bg-gray-50">
         <div suppressHydrationWarning className="text-center">
-          <h1 className="text-2xl font-bold text-red-600">Access Denied</h1>
-          <p className="mt-2 text-gray-600">You don't have permission to view this page.</p>
-          <button onClick={() => router.push('/dashboard')} className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md">Go to Dashboard</button>
+          <h1 className="text-2xl font-bold text-red-600">{t('access_denied_title')}</h1>
+          <p className="mt-2 text-gray-600">{t('access_denied_msg')}</p>
+          <button onClick={() => router.push('/dashboard')} className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md">{t('go_to_dashboard')}</button>
         </div>
       </div>
     );
@@ -42,9 +44,12 @@ export default function RoleGuard({ children, allowedRoles }: { children: React.
   return (
     <div suppressHydrationWarning className="flex h-screen overflow-hidden bg-gray-50">
       <Sidebar />
-      <div suppressHydrationWarning className="flex flex-col flex-1 md:ml-64 w-full">
+      {/* flex-1 + ml-64 (no w-full): margin is subtracted from the flex item's
+          width so content never exceeds the viewport. min-w-0 lets tables and
+          grids shrink instead of forcing horizontal overflow. */}
+      <div suppressHydrationWarning className="flex flex-col flex-1 min-w-0 md:ml-64">
         <TopBar />
-        <main suppressHydrationWarning className="flex-1 overflow-y-auto p-4 md:p-6">
+        <main suppressHydrationWarning className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6">
           {children}
         </main>
       </div>
