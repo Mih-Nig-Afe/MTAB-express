@@ -1,19 +1,24 @@
-fastapi==0.115.0
-uvicorn[standard]==0.30.6
-sqlalchemy[asyncio]==2.0.35
-asyncpg==0.29.0
-alembic==1.13.2
-pydantic==2.9.2
-pydantic-settings==2.5.2
-httpx==0.27.2
-python-telegram-bot==21.6
-python-dotenv==1.0.1
-celery==5.4.0
-redis==5.0.8
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
-bcrypt==4.2.1
-boto3==1.35.0
+fastapi==0.141.1
+uvicorn[standard]==0.52.4
+sqlalchemy[asyncio]==2.0.52
+asyncpg==0.31.0
+alembic==1.19.1
+pydantic==2.13.4
+pydantic-settings==2.15.0
+httpx==0.28.1
+python-telegram-bot==22.8
+python-dotenv==1.2.3
+celery==5.6.3
+redis==5.2.1
+# python-jose >= 3.4.0 fixes CVE-2024-33663 / CVE-2024-33664 (JWT algorithm confusion)
+python-jose[cryptography]==3.5.0
+bcrypt==5.0.0  # replaces unmaintained passlib; reads existing $2b$ hashes unchanged
+boto3==1.43.78
+# Held at 62.x deliberately: newer majors risk thermal waybill layout regressions; no known CVEs
 weasyprint==62.3
-jinja2==3.1.4
-python-multipart==0.0.12
+qrcode==8.2
+python-barcode==0.16.1
+# jinja2 >= 3.1.6 fixes CVE-2025-27516 (sandbox breakout via |attr filter)
+jinja2==3.1.6
+# python-multipart >= 0.0.18 fixes multi-part DoS advisories
+python-multipart==0.0.32
