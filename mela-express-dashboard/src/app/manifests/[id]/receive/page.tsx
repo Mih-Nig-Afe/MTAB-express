@@ -97,7 +97,7 @@ export default function ReceiveManifest() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{t('receive')} — {t('destination')}</h1>
             <p className="text-sm text-gray-500 mt-1">
-              {t('receive_incoming_hint', { plate: manifest.vehicle_plate, driver: manifest.driver_name })}
+              {t('receive_incoming_hint', { plate: manifest.vehicle_plate || '', driver: manifest.driver_name || '' })}
             </p>
           </div>
           <button 

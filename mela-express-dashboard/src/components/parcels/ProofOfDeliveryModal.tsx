@@ -72,7 +72,7 @@ export default function ProofOfDeliveryModal({ parcel, onClose, onSuccess }: PoD
     setGeneratingOtp(true);
     try {
       const res = await api.post(`/parcels/${parcel.id}/otp`);
-      toast.info(t('otp_generated_msg', { otp: res.data.pickup_otp, phone: res.data.receiver_phone }), t('otp_dispatched'));
+      toast.info(t('otp_generated_msg', { otp: String(res.data.pickup_otp ?? ''), phone: String(res.data.receiver_phone ?? '') }), t('otp_dispatched'));
       setOtp(res.data.pickup_otp); // Autofill for convenience in dev/testing
     } catch (err: any) {
       toast.error(t('failed_otp'));

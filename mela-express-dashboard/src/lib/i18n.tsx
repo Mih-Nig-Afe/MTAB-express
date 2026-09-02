@@ -11,7 +11,7 @@ export type Language = SupportedLanguage;
 interface I18nContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string, vars?: Record<string, string | number>) => string;
+  t: (key: string, vars?: Record<string, string | number | undefined>) => string;
 }
 
 const I18nContext = createContext<I18nContextType>({
@@ -52,7 +52,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const t = (key: string, vars?: Record<string, string | number>): string =>
+  const t = (key: string, vars?: Record<string, string | number | undefined>): string =>
     (vars ? i18next.t(key, vars) : i18next.t(key)) as string;
 
   return (
@@ -66,7 +66,7 @@ export const useTranslation = () => useContext(I18nContext);
 
 /** Translate `prefix + value` (e.g. status_in_transit); fall back to a readable raw value. */
 export function labelFor(
-  t: (key: string, vars?: Record<string, string | number>) => string,
+  t: (key: string, vars?: Record<string, string | number | undefined>) => string,
   prefix: string,
   value?: string | null,
 ): string {
