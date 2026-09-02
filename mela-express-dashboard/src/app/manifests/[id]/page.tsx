@@ -1,10 +1,12 @@
 'use client';
+import { useTranslation } from '@/lib/i18n';
 import useSWR from 'swr';
 import { useParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import RoleGuard from '@/components/layout/RoleGuard';
 
 export default function ManifestDetail() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const { data, isLoading } = useSWR(`/manifests/${id}`, url => api.get(url).then(res => res.data));
 
