@@ -22,6 +22,7 @@ from app.models import Customer, Parcel, ParcelStatus, ContentCategory
 from app.models.parcels import SizeCategory
 from app.schemas import ParcelOut, ParcelTrackOut
 from app.exceptions import NotFoundError
+from app.i18n import t
 from app.routers.parcels import _parcel_out
 from app.routers.parcels import track_parcel as public_track_parcel
 from app.services.labels import track_url
@@ -131,7 +132,7 @@ async def auth_telegram(body: TelegramAuthIn, db: AsyncSession = Depends(get_db)
     elif not customer:
         raise HTTPException(
             status_code=404,
-            detail="Link your phone in the Mela Express bot first (/start → share contact)",
+            detail=t("customer.link_phone_bot"),
         )
 
     if user.get("first_name") and not customer.name:

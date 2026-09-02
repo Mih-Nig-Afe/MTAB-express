@@ -3,6 +3,7 @@ import logging
 from telegram import BotCommand, MenuButtonWebApp, WebAppInfo
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, CallbackQueryHandler
 from app.config import settings
+from app.core.brand import tracking_example
 
 from app.bot.handlers.start import start, handle_contact
 from app.bot.handlers.track import track
@@ -26,7 +27,7 @@ def build_app():
         # Slash-command hints in the chat menu.
         await application.bot.set_my_commands([
             BotCommand("start", "Welcome & link your phone"),
-            BotCommand("track", "Track a parcel, e.g. /track MEX-HW-000482"),
+            BotCommand("track", f"Track a parcel, e.g. /track {tracking_example()}"),
             BotCommand("my_parcels", "View your shipments"),
             BotCommand("help", "Commands & tips"),
             BotCommand("lang", "Switch language (en / am)"),

@@ -2,11 +2,30 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
 import ClientLayout from "./client-layout";
+import { brandFromEnv, displayName } from "@brand";
+import { loadBrandFromApi } from "@/lib/brand";
 
-export const metadata: Metadata = {
-  title: "Mela Express Dashboard",
-  description: "Mela Express Dashboard",
-};
+async function resolveBrandName(): Promise<string> {
+  const env = brandFromEnv(process.env, "NEXT_PUBLIC_");
+  let name = displayName(env);
+  if (!name && process.env.NEXT_PUBLIC_API_URL) {
+    try {
+      const fromApi = await loadBrandFromApi(process.env.NEXT_PUBLIC_API_URL);
+      name = displayName(fromApi);
+    } catch {
+      /* API unreachable at build/SSR time */
+    }
+  }
+  return name;
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const name = await resolveBrandName();
+  return {
+    title: name ? `${name} Dashboard` : "Operations Dashboard",
+    description: name ? `${name} operations dashboard` : "Parcel operations dashboard",
+  };
+}
 
 // Some browser extensions (e.g. Edge/Bing "shopping" features) inject
 // bis_skin_checked / bis_size attributes into the DOM before React hydrates,

@@ -6,6 +6,8 @@ import { authApi } from '@/api/authApi';
 import { setTokens, setUser, useAuth } from '@/lib/auth';
 import { useToast } from '@/components/ui/Toast';
 import { useTranslation } from '@/lib/i18n';
+import { useBrand } from '@/components/BrandProvider';
+import { displayName } from '@brand';
 
 export default function Login() {
   const [phone, setPhone] = useState('');
@@ -17,6 +19,7 @@ export default function Login() {
   const { setUser: setContextUser } = useAuth();
   const toast = useToast();
   const { t } = useTranslation();
+  const brand = useBrand();
 
   const handleQuickFill = () => {
     setPhone('0900000000');
@@ -67,7 +70,7 @@ export default function Login() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600 text-white text-3xl shadow-lg shadow-blue-500/30 mb-3">
             📦
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">Mela Express</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">{displayName(brand)}</h1>
           <p className="text-gray-500 text-sm mt-1">{t('login_subtitle')}</p>
         </div>
         

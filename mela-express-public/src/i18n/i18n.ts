@@ -1,6 +1,8 @@
 // i18n initialisation — static locale JSON imports, flat key lookup.
 import i18next from "i18next";
 
+import { brandFromEnv, toI18nVars } from "@brand";
+
 import enCommon from "@/locales/en/common.json";
 import enTracking from "@/locales/en/tracking.json";
 import enStatuses from "@/locales/en/statuses.json";
@@ -25,7 +27,7 @@ void i18next.init({
   resources: { en: { translation: en }, am: { translation: am } },
   keySeparator: false,
   nsSeparator: false,
-  interpolation: { escapeValue: false },
+  interpolation: { escapeValue: false, defaultVariables: toI18nVars(brandFromEnv(process.env, "NEXT_PUBLIC_")) },
   saveMissing: process.env.NODE_ENV === "development",
   missingKeyHandler: (_lngs, _ns, key) => {
     // eslint-disable-next-line no-console

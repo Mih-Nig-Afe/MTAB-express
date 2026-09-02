@@ -5,11 +5,14 @@ import { useAuth } from '@/lib/auth';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { useTranslation } from '@/lib/i18n';
+import { useBrand } from '@/components/BrandProvider';
+import { displayName } from '@brand';
 
 export default function Sidebar() {
   const pathname = usePathname();
   const { user } = useAuth();
   const { t } = useTranslation();
+  const brand = useBrand();
   const [isOpen, setIsOpen] = useState(false);
 
   const links = [
@@ -37,7 +40,7 @@ export default function Sidebar() {
       </button>
       <div className={cn("fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 ease-in-out md:translate-x-0", isOpen ? "translate-x-0" : "-translate-x-full")}>
         <div className="flex items-center justify-center h-16 border-b border-gray-200">
-          <span className="text-xl font-bold text-blue-600">Mela Express</span>
+          <span className="text-xl font-bold text-blue-600">{displayName(brand)}</span>
         </div>
         <nav className="p-4 space-y-1 overflow-y-auto h-[calc(100vh-4rem)]">
           {links.map((link) => (

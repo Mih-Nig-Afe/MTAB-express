@@ -43,14 +43,20 @@ def resolve_locale(query_lang: str | None, accept_language: str | None) -> str:
     return _DEFAULT
 
 
-def t(key: str, lang: str | None = None) -> str:
+def t(key: str, lang: str | None = None, **fmt) -> str:
     """Translate a namespaced key. Uses request locale unless `lang` given."""
+    from app.core.brand import brand_context
+
     loc = lang if lang in SUPPORTED else get_locale()
-    return (
+    text = (
         _TRANSLATIONS.get(loc, {}).get(key)
         or _TRANSLATIONS[_DEFAULT].get(key)
         or key
     )
+    try:
+        return text.format(**{**brand_context(), **fmt})
+    except (KeyError, IndexError):
+        return text
 
 
 def terr(english_detail: str) -> str:

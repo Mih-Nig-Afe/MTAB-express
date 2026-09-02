@@ -253,7 +253,7 @@ export default function TelegramMiniApp() {
               <form onSubmit={(e) => { e.preventDefault(); handleTrack(); }} className="space-y-3">
                 <input
                   type="text"
-                  placeholder="MEX-HW-000000"
+                  placeholder={t('pay_tracking_placeholder')}
                   value={trackingInput}
                   onChange={(e) => setTrackingInput(e.target.value)}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-2xl text-sm font-mono uppercase font-bold focus:border-blue-600 outline-none"

@@ -3,13 +3,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.exceptions import register_exception_handlers
 from app.i18n.middleware import LocaleMiddleware
+from app.core.brand import brand_name
 from app.routers import (
-    auth, parcels, payments, customers, manifests, branches, staff, reports, customer_portal
+    auth, parcels, payments, customers, manifests, branches, staff, reports, customer_portal, public_config
 )
 
+_api_title = brand_name() or "Parcel"
 app = FastAPI(
-    title="Mela Express API",
-    description="Backend API for Mela Express parcel delivery platform",
+    title=f"{_api_title} API",
+    description=f"Backend API for {_api_title} parcel delivery platform",
     version="1.0.0"
 )
 
@@ -36,6 +38,7 @@ app.include_router(branches.router)
 app.include_router(staff.router)
 app.include_router(reports.router)
 app.include_router(customer_portal.router)
+app.include_router(public_config.router)
 
 @app.get("/health", tags=["health"])
 async def health_check():

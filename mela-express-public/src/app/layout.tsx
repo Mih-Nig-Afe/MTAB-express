@@ -3,14 +3,34 @@ import Script from "next/script";
 import "./globals.css";
 import { I18nProvider } from "@/lib/i18n";
 import LanguageSyncer from "@/i18n/LanguageSyncer";
+import { BrandProvider } from "@/components/BrandProvider";
+import { brandFromEnv, displayName } from "@brand";
+import { loadBrandFromApi } from "@/lib/brand";
 
-export const metadata: Metadata = {
-  title: "Mela Express — Track Your Parcel",
-  description: "Track your Mela Express parcel in real time.",
-};
+async function resolveBrandName(): Promise<string> {
+  const env = brandFromEnv(process.env, "NEXT_PUBLIC_");
+  let name = displayName(env);
+  if (!name && process.env.NEXT_PUBLIC_API_URL) {
+    try {
+      const fromApi = await loadBrandFromApi(process.env.NEXT_PUBLIC_API_URL);
+      name = displayName(fromApi);
+    } catch {
+      /* API unreachable at build/SSR time */
+    }
+  }
+  return name;
+}
 
-// Pre-hydration guard against browser-extension DOM injections
-// (bis_skin_checked etc. cause hydration-mismatch warnings).
+export async function generateMetadata(): Promise<Metadata> {
+  const name = await resolveBrandName();
+  return {
+    title: name ? `${name} — Track Your Parcel` : "Track Your Parcel",
+    description: name
+      ? `Track your ${name} parcel in real time.`
+      : "Track your parcel in real time.",
+  };
+}
+
 const EXTENSION_GUARD = `
 (function () {
   var clean = function () {
@@ -41,8 +61,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {EXTENSION_GUARD}
         </Script>
         <I18nProvider>
-          <LanguageSyncer />
-          {children}
+          <BrandProvider>
+            <LanguageSyncer />
+            {children}
+          </BrandProvider>
         </I18nProvider>
       </body>
     </html>

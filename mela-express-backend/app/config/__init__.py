@@ -12,6 +12,11 @@ class Settings(BaseSettings):
     chapa_webhook_secret: str = ""  # used to verify incoming webhook signatures
     chapa_base_url: str = "https://api.chapa.co/v1"
 
+    # Branding — set in .env only (see repo root .env.example). No hardcoded names in code.
+    brand_name: str = ""
+    brand_short: str = ""
+    tracking_prefix: str = ""
+
     # App — external URLs (Chapa webhooks, public links)
     app_base_url: str = "https://your-domain.example.com"
     # Bot/worker → API inside Docker (e.g. http://api:8000). Falls back to app_base_url.
@@ -49,7 +54,7 @@ class Settings(BaseSettings):
     # SMS
     sms_api_url: str = ""
     sms_api_key: str = ""
-    sms_sender_id: str = "MelaExpress"
+    sms_sender_id: str = ""
 
     # Flight tracking (optional — ETA still works from staff-entered times)
     aviationstack_api_key: str = ""
