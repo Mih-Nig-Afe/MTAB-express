@@ -1,0 +1,20 @@
+{
+  "admin_section": "Administration",
+  "branch_hub": "Branch Hub",
+  "branches": "Branches",
+  "cash": "Cash Reconciliation",
+  "cash_short": "Cash",
+  "create_manifest": "Create Manifest",
+  "dashboard": "Dashboard",
+  "headquarters_admin": "Mela Express HQ",
+  "logout": "Logout",
+  "manifests": "Manifests",
+  "new_parcel": "+ New Parcel",
+  "overrides": "Overrides Log",
+  "parcels": "Parcels",
+  "reports": "Reports & Analytics",
+  "staff": "Staff Users",
+  "ops_nav": "Operations KPI",
+  "scan_nav": "Scan Station",
+  "user_fallback": "User"
+}

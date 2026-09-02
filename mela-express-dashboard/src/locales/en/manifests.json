@@ -1,0 +1,18 @@
+{
+  "checkpoints": "Checkpoints",
+  "create_manifest": "Create Manifest",
+  "driver_name": "Driver Name",
+  "location_name": "Location Name",
+  "manifest_no": "Manifest #",
+  "manifest_received": "Manifest received successfully",
+  "manifests": "Manifests",
+  "mark_verified": "Mark verified",
+  "no_parcels_for_route": "No parcels available at this origin branch.",
+  "notes": "Notes",
+  "parcels_count": "Parcels",
+  "receive": "Receive",
+  "receive_submit": "Confirm Receipt of Checked Parcels",
+  "receive_warning": "Unchecked parcels will be marked ON HOLD.",
+  "select_parcels_hint": "Parcels ready to dispatch from origin branch",
+  "vehicle_plate": "Vehicle Plate"
+}
