@@ -1,4 +1,5 @@
 'use client';
+import { useTranslation } from '@/lib/i18n';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
@@ -7,12 +8,33 @@ import { Manifest, Parcel } from '@/types';
 import { useToast } from '@/components/ui/Toast';
 
 export default function ReceiveManifest() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const router = useRouter();
   const toast = useToast();
   const [manifest, setManifest] = useState<Manifest | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [submitting, setSubmitting] = useState(false);
+  const [scanCode, setScanCode] = useState('');
+  const [scanning, setScanning] = useState(false);
+
+  const handleScan = async () => {
+    if (!scanCode.trim()) return;
+    setScanning(true);
+    try {
+      const res = await api.post(`/manifests/${id}/scan`, { code: scanCode.trim() });
+      const parcel = manifest?.parcels?.find(p => p.tracking_code === res.data.tracking_code);
+      if (parcel) {
+        setSelected(prev => new Set([...prev, parcel.id]));
+      }
+      toast.success(res.data.message, t('scan_success_title'));
+      setScanCode('');
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || t('scan_failed'));
+    } finally {
+      setScanning(false);
+    }
+  };
 
   useEffect(() => {
     api.get(`/manifests/${id}`)
@@ -63,7 +85,7 @@ export default function ReceiveManifest() {
   };
 
   if (!manifest) {
-    return <RoleGuard><div className="p-8 text-center text-gray-500">Loading manifest...</div></RoleGuard>;
+    return <RoleGuard><div className="p-8 text-center text-gray-500">{t('loading')}</div></RoleGuard>;
   }
 
   const parcels = manifest.parcels || [];
@@ -73,7 +95,7 @@ export default function ReceiveManifest() {
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Destination Bulk Check-In</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('receive')} — {t('destination')}</h1>
             <p className="text-sm text-gray-500 mt-1">
               Verify incoming packages for vehicle <span className="font-semibold text-gray-800">{manifest.vehicle_plate}</span> (Driver: {manifest.driver_name})
             </p>
@@ -88,6 +110,24 @@ export default function ReceiveManifest() {
         </div>
 
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 space-y-4">
+          <div className="flex gap-2">
+            <input
+              value={scanCode}
+              onChange={e => setScanCode(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleScan())}
+              placeholder={t('scan_or_type_code')}
+              className="flex-1 font-mono border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+            <button
+              type="button"
+              onClick={handleScan}
+              disabled={scanning || !scanCode.trim()}
+              className="px-5 py-3 bg-blue-600 text-white font-semibold rounded-xl text-sm disabled:opacity-50"
+            >
+              {scanning ? t('scanning') : t('confirm_scan')}
+            </button>
+          </div>
+
           <h2 className="text-sm font-semibold text-gray-700 uppercase">
             Parcels in Manifest ({selected.size}/{parcels.length} Verified)
           </h2>

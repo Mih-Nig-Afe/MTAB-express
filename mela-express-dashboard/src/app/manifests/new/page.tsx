@@ -1,4 +1,5 @@
 'use client';
+import { useTranslation } from '@/lib/i18n';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
@@ -7,6 +8,7 @@ import { Branch, Parcel } from '@/types';
 import { useToast } from '@/components/ui/Toast';
 
 export default function NewManifestPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const toast = useToast();
   const [branches, setBranches] = useState<Branch[]>([]);
@@ -101,14 +103,14 @@ export default function NewManifestPage() {
     <RoleGuard allowedRoles={['admin', 'manager', 'operator']}>
       <div className="max-w-4xl mx-auto space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Create Transfer Manifest</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('create_manifest')}</h1>
           <p className="text-sm text-gray-500 mt-1">Batch parcels for inter-city transit and assign driver/vehicle.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Origin Branch</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">{t('origin')}</label>
               <select 
                 value={formData.origin_branch_id} 
                 onChange={e => setFormData({...formData, origin_branch_id: e.target.value})} 
@@ -118,7 +120,7 @@ export default function NewManifestPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Destination Branch</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">{t('destination')}</label>
               <select 
                 value={formData.destination_branch_id} 
                 onChange={e => setFormData({...formData, destination_branch_id: e.target.value})} 
@@ -128,7 +130,7 @@ export default function NewManifestPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Driver Name</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">{t('driver_name')}</label>
               <input 
                 required 
                 type="text" 
@@ -139,7 +141,7 @@ export default function NewManifestPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Vehicle Plate Number</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">{t('vehicle_plate')} Number</label>
               <input 
                 required 
                 type="text" 

@@ -1,4 +1,5 @@
 'use client';
+import { useTranslation } from '@/lib/i18n';
 import useSWR from 'swr';
 import { api } from '@/lib/api';
 import RoleGuard from '@/components/layout/RoleGuard';
@@ -8,13 +9,14 @@ import Link from 'next/link';
 const fetcher = (url: string) => api.get(url).then(res => res.data);
 
 export default function Overrides() {
+  const { t } = useTranslation();
   const { data: logs, isLoading } = useSWR<any[]>('/reports/operator-overrides', fetcher);
 
   return (
-    <RoleGuard allowedRoles={['admin', 'manager']}>
+    <RoleGuard allowedRoles={['admin']}>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Manual Overrides & Exceptions</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('overrides')}</h1>
           <p className="text-sm text-gray-500 mt-1">Audit log of manager fee overrides, waiver authorizations, and cash counter exceptions.</p>
         </div>
 
@@ -22,10 +24,10 @@ export default function Overrides() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Parcel Tracking</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Authorized Operator</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Override Reason / Justification</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('parcel_code')}</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('operator_name')}</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('amount')}</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('reason')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 bg-white">
